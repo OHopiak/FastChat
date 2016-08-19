@@ -1,11 +1,5 @@
 package com.fastchat.FastChat;
 
-import java.awt.Component;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -13,58 +7,20 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.border.EmptyBorder;
-import javax.swing.text.DefaultCaret;
-
-import org.eclipse.wb.swing.FocusTraversalOnArray;
-
-public class Client extends JFrame {
-	
-	private static final long serialVersionUID = 5015815262080715846L;
-	private JPanel contentPane;
+public class Client {
 	
 	private String name;
-	private String address;
 	private int port;
-	
-	private final static int WIDTH = 800;
-	private final static int HEIGHT = 600;
-	private JTextField txtMessage;
-	private JTextArea history;
-	private DefaultCaret caret;
-	private boolean connected;
+	private int ID;
 	private DatagramSocket socket;
 	private InetAddress ip;
 	private Thread send;
+	private boolean running;
 	
-	public Client(String name, String address, int port) {
-		this.name = name;
-		this.address = address;
-		this.port = port;
-		createWindow();
-		console("Attempting to conect to " + address + ":" + port);
-		connected = openConnection(this.address, port);
-		if (!connected) {
-			// System.err.println("Connection failed");
-			console("Connection failed");
-			txtMessage.setEditable(false);
-		} else {
-			console("Connected successfully\r\n");
-		}
-		String connection = name + " connected from " + address + ":"  + port;
-		send(connection.getBytes());
-		
-	}
 	
-	private boolean openConnection(String address, int port) {
+	protected boolean openConnection(String address) {
 		try {
-			socket = new DatagramSocket(port);
+			socket = new DatagramSocket();
 			ip = InetAddress.getByName(address);
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
@@ -76,7 +32,7 @@ public class Client extends JFrame {
 		return true;
 	}
 	
-	private String receive() {
+	protected String receive() {
 		byte[] data = new byte[1024];
 		DatagramPacket packet = new DatagramPacket(data, data.length);
 		try {
@@ -85,10 +41,11 @@ public class Client extends JFrame {
 			e.printStackTrace();
 		}
 		String message = new String(packet.getData());
+		message = message.split("/e/")[0];
 		return message;
 	}
 	
-	private void send(final byte[] data) {
+	protected void send(final byte[] data) {
 		send = new Thread("Send") {
 			public void run() {
 				DatagramPacket packet = new DatagramPacket(data, data.length, ip, port);
@@ -99,78 +56,50 @@ public class Client extends JFrame {
 				}
 			}
 		};
+		send.start();
 	}
 	
-	private void console(String message) {
-		history.setCaretPosition(history.getDocument().getLength());
-		history.append(message + "\r\n");
-	}
-	
-	private void send(String message) {
-		if (message.equals("")) return;
-		message = name + ": " + message;
-		console(message);
+	protected void send(String message) {
+		message += "/e/";
 		send(message.getBytes());
-		txtMessage.setText("");
 	}
 	
-	private void createWindow() {
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setSize(WIDTH, HEIGHT);
-		setLocationRelativeTo(null);
-		setVisible(true);
-		contentPane = new JPanel();
-		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-		setContentPane(contentPane);
-		GridBagLayout gbl_contentPane = new GridBagLayout();
-		gbl_contentPane.columnWidths = new int[] { 5, WIDTH - 30, 20, 0 };
-		gbl_contentPane.rowHeights = new int[] { 5, HEIGHT - 30, 20, 5 };
-		gbl_contentPane.columnWeights = new double[] { 0.0, 1.0, Double.MIN_VALUE };
-		gbl_contentPane.rowWeights = new double[] { 0.0, 1.0, 0.0, Double.MIN_VALUE };
-		contentPane.setLayout(gbl_contentPane);
-		
-		JScrollPane scrollPane = new JScrollPane();
-		GridBagConstraints gbc_scrollPane = new GridBagConstraints();
-		gbc_scrollPane.insets = new Insets(0, 0, 5, 5);
-		gbc_scrollPane.fill = GridBagConstraints.BOTH;
-		gbc_scrollPane.gridx = 1;
-		gbc_scrollPane.gridy = 1;
-		gbc_scrollPane.gridwidth = 2;
-		contentPane.add(scrollPane, gbc_scrollPane);
-		
-		history = new JTextArea();
-		history.setEditable(false);
-		caret = (DefaultCaret) history.getCaret();
-		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
-		scrollPane.setViewportView(history);
-		
-		txtMessage = new JTextField();
-		txtMessage.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				send(txtMessage.getText());
-			}
-		});
-		GridBagConstraints gbc_textField = new GridBagConstraints();
-		gbc_textField.insets = new Insets(0, 0, 0, 5);
-		gbc_textField.fill = GridBagConstraints.HORIZONTAL;
-		gbc_textField.gridx = 1;
-		gbc_textField.gridy = 2;
-		contentPane.add(txtMessage, gbc_textField);
-		txtMessage.setColumns(10);
-		txtMessage.requestFocusInWindow();
-		
-		JButton btnSend = new JButton("Send");
-		btnSend.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				send(txtMessage.getText());
-			}
-		});
-		GridBagConstraints gbc_btnSend = new GridBagConstraints();
-		gbc_btnSend.insets = new Insets(0, 0, 0, 5);
-		gbc_btnSend.gridx = 2;
-		gbc_btnSend.gridy = 2;
-		contentPane.add(btnSend, gbc_btnSend);
-		contentPane.setFocusTraversalPolicy(
-				new FocusTraversalOnArray(new Component[] { scrollPane, btnSend, history, txtMessage }));
+	protected void disconnect() {
+		String connection = name + " disconnected from " + socket.getLocalAddress() + ":" + socket.getLocalPort();
+		send(connection);
+	}
+	
+	public String getName() {
+		return name;
+	}
+	
+	public void setID(int iD) {
+		ID = iD;
+	}
+	
+	public int getID() {
+		return ID;
+	}
+	
+	public int getPort() {
+		return port;
+	}
+	
+	public InetAddress getIp() {
+		return ip;
+	}
+	
+	public Client(String name, int port) {
+		super();
+		this.name = name;
+		this.port = port;
+	}
+
+	public boolean isRunning() {
+		return running;
+	}
+
+	public void setRunning(boolean running) {
+		this.running = running;
 	}
 }

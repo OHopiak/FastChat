@@ -101,7 +101,7 @@ public class Login extends JFrame {
 		String name = txtName.getText();
 		String address = txtAddress.getText();
 		int port = Integer.parseInt(txtPort.getText());
-		new Client(name, address, port);
+		new ClientWindow(name, address, port);
 		this.setVisible(false);
 	}
 	

@@ -8,7 +8,6 @@ public class ServerMain {
 			return;
 		}
 		int port = Integer.parseInt(args[0]);
-		System.out.println(port);
 		new Server(port);
 	}
 	
