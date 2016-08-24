@@ -7,17 +7,23 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 public class Server implements Runnable {
 	
+	private final int MAX_ATTEMPTS = 4;
 	private List<ServerClient> clients = new ArrayList<ServerClient>();
+	private ArrayList<Integer> response = new ArrayList<Integer>();
 	
 	private DatagramSocket socket;
 	private int port;
 	private Thread run, manage, send, receive;
 	private boolean running;
+	private boolean raw;
+	private static final String[] commands = { "clients", "cls", "help", "kick", "raw" };
 	
 	public Server(int port) {
+		System.out.println("Server started at port " + port);
 		this.port = port;
 		try {
 			socket = new DatagramSocket(this.port);
@@ -33,13 +39,107 @@ public class Server implements Runnable {
 		running = true;
 		manageClients();
 		receive();
+		Scanner in = new Scanner(System.in);
+		while (running) {
+			String text = in.nextLine();
+			if (!text.startsWith("/")) {
+				sendToAll("/m/Server: " + text + "/e/");
+				System.out.println("/m/Server: " + text + "/e/");
+				continue;
+			}
+			text = text.substring(1);
+			command(text);
+		}
+		if (!running) in.close();
+	}
+	
+	private void command(String text) {
+		switch (text.split(" ")[0]) {
+			case "raw":
+				raw = !raw;
+				break;
+			case "cls":
+				Process p;
+				try {
+					p = Runtime.getRuntime().exec("cls");
+					p.waitFor();
+				} catch (IOException | InterruptedException e) {
+					System.err.println("Cannot run this command");
+				}
+				break;
+			case "clients":
+				System.out.println("Clients:");
+				System.out.println("===================================");
+				for (ServerClient serverClient : clients) {
+					System.out.println(serverClient);
+				}
+				System.out.println("===================================");
+				break;
+			case "kick":
+				String name = text.split(" ")[1];
+				int id = -1;
+				boolean number = true;
+				try {
+					id = Integer.parseInt(name);
+				} catch (NumberFormatException e) {
+					number = false;
+				}
+				if (number) {
+					boolean exists = false;
+					for (ServerClient client : clients) {
+						if (client.getID() == id) {
+							exists = true;
+							break;
+						}
+					}
+					if (exists)
+						disconnectClient(id, true);
+					else
+						System.out.println("Client with id " + id + " does not exist");
+				} else {
+					for (ServerClient client : clients) {
+						if (name.equals(client.name)) {
+							disconnectClient(client.getID(), true);
+							break;
+						}
+					}
+				}
+				break;
+			case "help":
+				System.out.println("Available commands: ");
+				for (int i = 0; i < commands.length; i++) {
+					System.out.println("/" + commands[i]);
+				}
+				break;
+			default:
+				return;
+		}
+		
 	}
 	
 	private void manageClients() {
 		manage = new Thread("Manage") {
 			public void run() {
 				while (running) {
-					// managing
+					sendToAll("/i/");
+					try {
+						Thread.sleep(5000);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+					for (int i = 0; i < clients.size(); i++) {
+						ServerClient c = clients.get(i);
+						if (!response.contains(c.getID())) {
+							if (c.attempt >= MAX_ATTEMPTS) {
+								disconnectClient(c.getID(), false);
+							} else {
+								++c.attempt;
+							}
+						} else {
+							response.remove(new Integer(c.getID()));
+							c.attempt = 0;
+						}
+					}
 				}
 			}
 		};
@@ -89,22 +189,44 @@ public class Server implements Runnable {
 		}
 	}
 	
+	private void disconnectClient(int id, boolean manualDisconnect) {
+		for (ServerClient client : clients) {
+			if (client.getID() == id) {
+				String disc = client.name + "(" + client.getID() + ") ";
+				disc += (manualDisconnect ? "has disconnected" : "timed out");
+				clients.remove(client);
+				ServerClient.removeId(id);
+				System.out.println(disc);
+				sendToAll(disc);
+				break;
+			} else {
+				continue;
+			}
+		}
+	}
+	
 	private void process(DatagramPacket packet) {
 		String string = new String(packet.getData());
 		string = string.split("/e/")[0];
+		if (raw) System.out.println(string);
 		if (string.startsWith("/c/")) {
 			String name = string.substring(3);
 			ServerClient client = new ServerClient(name, packet.getAddress(), packet.getPort());
 			clients.add(client);
 			System.out.println(client + " has connected");
+			sendToAll(client.name + "(" + client.getID() + ") has connected");
 			send("/c/" + client.getID(), client.ip, client.port);
 		} else if (string.startsWith("/m/")) {
 			System.out.println(string);
 			sendToAll(string);
+		} else if (string.startsWith("/d/")) {
+			int id = Integer.parseInt(string.substring(3));
+			disconnectClient(id, true);
+		} else if (string.startsWith("/i/")) {
+			response.add(Integer.parseInt(string.substring(3)));
 		} else {
 			System.out.println(string);
 		}
 	}
-
 	
 }

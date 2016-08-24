@@ -17,7 +17,6 @@ public class Client {
 	private Thread send;
 	private boolean running;
 	
-	
 	protected boolean openConnection(String address) {
 		try {
 			socket = new DatagramSocket();
@@ -64,9 +63,10 @@ public class Client {
 		send(message.getBytes());
 	}
 	
-	protected void disconnect() {
-		String connection = name + " disconnected from " + socket.getLocalAddress() + ":" + socket.getLocalPort();
-		send(connection);
+	protected void disconnect(int id) {
+		running = false;
+		send("/d/" + id);
+		//socket.close();
 	}
 	
 	public String getName() {
@@ -94,11 +94,11 @@ public class Client {
 		this.name = name;
 		this.port = port;
 	}
-
+	
 	public boolean isRunning() {
 		return running;
 	}
-
+	
 	public void setRunning(boolean running) {
 		this.running = running;
 	}

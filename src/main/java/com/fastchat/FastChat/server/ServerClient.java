@@ -25,9 +25,9 @@ public class ServerClient {
 		this.ID = createId();
 	}
 	
-	private int createId() {
+	private static int createId() {
 		int id = new Random().nextInt();
-		if (!identifiers.contains(id)) {
+		if (!(identifiers.contains(id) || id <= 0)) {
 			identifiers.add(id);
 			return id;
 		} else {
@@ -35,8 +35,17 @@ public class ServerClient {
 		}
 	}
 	
+	public static void removeId(int id) {
+		for (Integer integer : identifiers) {
+			if (integer.equals(id)) {
+				identifiers.remove(integer);
+				return;
+			}
+		}
+	}
+	
 	@Override
 	public String toString() {
-		return "Client " + (name != null ? name + " - " : "") + (ip != null ? ip + ":" : "") + port + " ID: " + ID;
+		return (name != null ? name : "NONAME") + "(" + ID + ")" + (ip != null ? ip + ":" : "NOADDRESS") + port;
 	}
 }

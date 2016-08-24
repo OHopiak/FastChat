@@ -1,6 +1,5 @@
 package com.fastchat.FastChat;
 
-import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -18,9 +17,7 @@ import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 import javax.swing.text.DefaultCaret;
 
-import org.eclipse.wb.swing.FocusTraversalOnArray;
-
-public class ClientWindow extends JFrame implements Runnable{
+public class ClientWindow extends JFrame implements Runnable {
 	
 	private static final long serialVersionUID = 5015815262080715846L;
 	
@@ -46,7 +43,6 @@ public class ClientWindow extends JFrame implements Runnable{
 			console("Connection failed!");
 			txtMessage.setEditable(false);
 		} else {
-			console("Connected successfully\r\n");
 			run = new Thread(this, "Run");
 			run.start();
 		}
@@ -61,8 +57,8 @@ public class ClientWindow extends JFrame implements Runnable{
 	private void send(String message) {
 		if (message.equals("")) return;
 		message = client.getName() + ": " + message;
-		client.send("/m/" + message);
 		txtMessage.setText("");
+		client.send("/m/" + message);
 	}
 	
 	public void run() {
@@ -76,11 +72,13 @@ public class ClientWindow extends JFrame implements Runnable{
 					String message = client.receive();
 					if (message.startsWith("/c/")) {
 						client.setID(Integer.parseInt(message.substring(3)));
-						console("Connection is setted up... ID is " + client.getID());
+						console("Connection is setted up successfully... ID is " + client.getID());
 					} else if (message.startsWith("/m/")) {
 						console(message.substring(3));
+					} else if (message.startsWith("/i/")) {
+						client.send("/i/" + client.getID());
 					} else {
-						
+						console("Server: " + message);
 					}
 				}
 			}
@@ -89,6 +87,7 @@ public class ClientWindow extends JFrame implements Runnable{
 	}
 	
 	private void createWindow() {
+		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setSize(WIDTH, HEIGHT);
 		setLocationRelativeTo(null);
 		setVisible(true);
@@ -143,12 +142,12 @@ public class ClientWindow extends JFrame implements Runnable{
 		gbc_btnSend.gridx = 2;
 		gbc_btnSend.gridy = 2;
 		contentPane.add(btnSend, gbc_btnSend);
-		contentPane.setFocusTraversalPolicy(new FocusTraversalOnArray(new Component[] { scrollPane, btnSend, history, txtMessage }));
 		addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
-				client.disconnect();
+				client.disconnect(client.getID());
 				System.exit(0);
 			}
 		});
+		setTitle("FastChat Client. User: " + client.getName());
 	}
 }
