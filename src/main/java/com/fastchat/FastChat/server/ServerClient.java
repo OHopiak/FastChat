@@ -26,7 +26,7 @@ public class ServerClient {
 	}
 	
 	private static int createId() {
-		int id = new Random().nextInt();
+		int id = new Random().nextInt(10000);
 		if (!(identifiers.contains(id) || id <= 0)) {
 			identifiers.add(id);
 			return id;

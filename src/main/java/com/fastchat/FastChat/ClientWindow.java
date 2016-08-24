@@ -77,6 +77,15 @@ public class ClientWindow extends JFrame implements Runnable {
 						console(message.substring(3));
 					} else if (message.startsWith("/i/")) {
 						client.send("/i/" + client.getID());
+					}else if (message.startsWith("/d/")) {
+						message = message.substring(3);
+						if (message.equals("0")) {
+							client.setKicked(true);
+							client.disconnect(client.getID());
+						} else {
+							client.setBanned(true);
+							client.disconnect(client.getID());
+						}
 					} else {
 						console("Server: " + message);
 					}
@@ -145,7 +154,6 @@ public class ClientWindow extends JFrame implements Runnable {
 		addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
 				client.disconnect(client.getID());
-				System.exit(0);
 			}
 		});
 		setTitle("FastChat Client. User: " + client.getName());

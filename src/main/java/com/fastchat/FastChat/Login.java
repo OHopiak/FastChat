@@ -15,6 +15,10 @@ import javax.swing.border.EmptyBorder;
 public class Login extends JFrame {
 	
 	private static final long serialVersionUID = -6824082102990197571L;
+	
+	private static Login currentLogin;
+	private static ClientWindow clientWindow;
+	
 	private JPanel contentPane;
 	private JTextField txtName;
 	private JTextField txtAddress;
@@ -99,7 +103,7 @@ public class Login extends JFrame {
 		String name = txtName.getText();
 		String address = txtAddress.getText();
 		int port = Integer.parseInt(txtPort.getText());
-		new ClientWindow(name, address, port);
+		clientWindow = new ClientWindow(name, address, port);
 		this.setVisible(false);
 	}
 	
@@ -114,12 +118,28 @@ public class Login extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					new Login();
+					currentLogin = new Login();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
 		});
+	}
+	
+	public static Login getCurrentLogin() {
+		return currentLogin;
+	}
+	
+	public static void setCurrentLogin(Login login) {
+		currentLogin = login;
+	}
+	
+	public static ClientWindow getClientWindow() {
+		return clientWindow;
+	}
+	
+	public static void setClientWindow(ClientWindow clientWindow) {
+		Login.clientWindow = clientWindow;
 	}
 	
 }

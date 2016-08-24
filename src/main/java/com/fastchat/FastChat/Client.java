@@ -7,6 +7,8 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 
+import javax.swing.JOptionPane;
+
 public class Client {
 	
 	private String name;
@@ -15,7 +17,7 @@ public class Client {
 	private DatagramSocket socket;
 	private InetAddress ip;
 	private Thread send;
-	private boolean running;
+	private boolean running, kicked = false, banned = false;
 	
 	protected boolean openConnection(String address) {
 		try {
@@ -36,7 +38,7 @@ public class Client {
 		DatagramPacket packet = new DatagramPacket(data, data.length);
 		try {
 			socket.receive(packet);
-		} catch (IOException e) {
+		} catch (SocketException e1) {} catch (IOException e) {
 			e.printStackTrace();
 		}
 		String message = new String(packet.getData());
@@ -50,7 +52,7 @@ public class Client {
 				DatagramPacket packet = new DatagramPacket(data, data.length, ip, port);
 				try {
 					socket.send(packet);
-				} catch (IOException e) {
+				} catch (SocketException e1) {} catch (IOException e) {
 					e.printStackTrace();
 				}
 			}
@@ -67,6 +69,18 @@ public class Client {
 		running = false;
 		send("/d/" + id);
 		//socket.close();
+		if (kicked || banned) {
+			Login.getCurrentLogin().setVisible(true);
+			Login.getClientWindow().setVisible(false);
+			JOptionPane.showMessageDialog(null,
+					(kicked ? "You were kicked out of server\nTry to reconnect again"
+							: "You were banned on this server!\nYou can't reconnect unless the server restarts!"),
+					"Warning!", JOptionPane.WARNING_MESSAGE);
+			kicked = false;
+			banned = false;
+		} else {
+			System.exit(0);
+		}
 	}
 	
 	public String getName() {
@@ -101,5 +115,21 @@ public class Client {
 	
 	public void setRunning(boolean running) {
 		this.running = running;
+	}
+	
+	public boolean isKicked() {
+		return kicked;
+	}
+	
+	public void setKicked(boolean kicked) {
+		this.kicked = kicked;
+	}
+	
+	public boolean isBanned() {
+		return banned;
+	}
+	
+	public void setBanned(boolean banned) {
+		this.banned = banned;
 	}
 }

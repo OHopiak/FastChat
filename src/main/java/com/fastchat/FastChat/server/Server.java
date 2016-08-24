@@ -22,6 +22,10 @@ public class Server implements Runnable {
 	private boolean raw;
 	private static final String[] commands = { "clients", "cls", "help", "kick", "raw" };
 	
+	private static enum Status {
+		DISCONNECTED, TIMED_OUT, KICKED, BANNED
+	};
+	
 	public Server(int port) {
 		System.out.println("Server started at port " + port);
 		this.port = port;
@@ -57,6 +61,7 @@ public class Server implements Runnable {
 		switch (text.split(" ")[0]) {
 			case "raw":
 				raw = !raw;
+				System.out.println((raw ? "Raw mode enabled" : "Raw mode disabled"));
 				break;
 			case "cls":
 				Process p;
@@ -93,13 +98,13 @@ public class Server implements Runnable {
 						}
 					}
 					if (exists)
-						disconnectClient(id, true);
+						disconnectClient(id, Status.KICKED);
 					else
 						System.out.println("Client with id " + id + " does not exist");
 				} else {
 					for (ServerClient client : clients) {
 						if (name.equals(client.name)) {
-							disconnectClient(client.getID(), true);
+							disconnectClient(client.getID(), Status.KICKED);
 							break;
 						}
 					}
@@ -131,7 +136,7 @@ public class Server implements Runnable {
 						ServerClient c = clients.get(i);
 						if (!response.contains(c.getID())) {
 							if (c.attempt >= MAX_ATTEMPTS) {
-								disconnectClient(c.getID(), false);
+								disconnectClient(c.getID(), Status.TIMED_OUT);
 							} else {
 								++c.attempt;
 							}
@@ -189,11 +194,25 @@ public class Server implements Runnable {
 		}
 	}
 	
-	private void disconnectClient(int id, boolean manualDisconnect) {
+	private void disconnectClient(int id, Status status) {
 		for (ServerClient client : clients) {
 			if (client.getID() == id) {
 				String disc = client.name + "(" + client.getID() + ") ";
-				disc += (manualDisconnect ? "has disconnected" : "timed out");
+				switch (status) {
+					case DISCONNECTED:
+						disc += "disconnected.";
+						break;
+					case TIMED_OUT:
+						disc += "was timed out.";
+						break;
+					case KICKED:
+						send("/d/0", client.ip, client.getID());
+						disc += "was kicked out of server.";
+						break;
+					case BANNED:
+						disc += "was banned!";
+						break;
+				}
 				clients.remove(client);
 				ServerClient.removeId(id);
 				System.out.println(disc);
@@ -221,7 +240,7 @@ public class Server implements Runnable {
 			sendToAll(string);
 		} else if (string.startsWith("/d/")) {
 			int id = Integer.parseInt(string.substring(3));
-			disconnectClient(id, true);
+			disconnectClient(id, Status.DISCONNECTED);
 		} else if (string.startsWith("/i/")) {
 			response.add(Integer.parseInt(string.substring(3)));
 		} else {
