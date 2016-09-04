@@ -10,6 +10,9 @@ import java.awt.event.WindowEvent;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -31,6 +34,12 @@ public class ClientWindow extends JFrame implements Runnable {
 	
 	private Thread run, listen;
 	private Client client;
+	private JMenuBar menuBar;
+	private JMenu menu;
+	private JMenuItem onlineUsers;
+	private OnlineUsers users;
+	
+	private String[] userArr = { "Name" };
 	
 	public ClientWindow(String name, String address, int port) {
 		client = new Client(name, port);
@@ -77,7 +86,7 @@ public class ClientWindow extends JFrame implements Runnable {
 						console(message.substring(3));
 					} else if (message.startsWith("/i/")) {
 						client.send("/i/" + client.getID());
-					}else if (message.startsWith("/d/")) {
+					} else if (message.startsWith("/d/")) {
 						message = message.substring(3);
 						if (message.equals("0")) {
 							client.setKicked(true);
@@ -100,6 +109,23 @@ public class ClientWindow extends JFrame implements Runnable {
 		setSize(WIDTH, HEIGHT);
 		setLocationRelativeTo(null);
 		setVisible(true);
+		
+		menuBar = new JMenuBar();
+		setJMenuBar(menuBar);
+		
+		menu = new JMenu("Menu");
+		menuBar.add(menu);
+		
+		users = new OnlineUsers();
+		users.updateList(userArr);
+		onlineUsers = new JMenuItem("Online Users");
+		onlineUsers.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				users.updateList(userArr);
+				users.setVisible(true);
+			}
+		});
+		menu.add(onlineUsers);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
