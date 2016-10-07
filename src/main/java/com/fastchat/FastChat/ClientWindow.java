@@ -39,7 +39,7 @@ public class ClientWindow extends JFrame implements Runnable {
 	private JMenuItem onlineUsers;
 	private OnlineUsers users;
 	
-	private String[] userArr = { "Name" };
+	private String[] userArr = { "Name(id)" };
 	
 	public ClientWindow(String name, String address, int port) {
 		client = new Client(name, port);
@@ -78,7 +78,7 @@ public class ClientWindow extends JFrame implements Runnable {
 		listen = new Thread("Listen") {
 			public void run() {
 				while (client.isRunning()) {
-					String message = client.receive();
+					String message = client.receive();					
 					if (message.startsWith("/c/")) {
 						client.setID(Integer.parseInt(message.substring(3)));
 						console("Connection is setted up successfully... ID is " + client.getID());
@@ -88,13 +88,17 @@ public class ClientWindow extends JFrame implements Runnable {
 						client.send("/i/" + client.getID());
 					} else if (message.startsWith("/d/")) {
 						message = message.substring(3);
-						if (message.equals("0")) {
+						if (message.startsWith("0")) {
 							client.setKicked(true);
 							client.disconnect(client.getID());
 						} else {
 							client.setBanned(true);
 							client.disconnect(client.getID());
 						}
+					} else if (message.startsWith("/u/")) {
+						message = message.substring(3);
+						userArr = message.split("//");
+						users.updateList(userArr);
 					} else {
 						console("Server: " + message);
 					}
@@ -121,6 +125,7 @@ public class ClientWindow extends JFrame implements Runnable {
 		onlineUsers = new JMenuItem("Online Users");
 		onlineUsers.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
+				client.send("/u/");
 				users.updateList(userArr);
 				users.setVisible(true);
 			}

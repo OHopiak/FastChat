@@ -20,7 +20,7 @@ public class Server implements Runnable {
 	private Thread run, manage, send, receive;
 	private boolean running;
 	private boolean raw;
-	private static final String[] commands = { "clients", "cls", "help", "kick", "raw" };
+	private static final String[] commands = { "clients", /*"cls",*/ "help", "kick", "raw", "exit" };
 	
 	private static enum Status {
 		DISCONNECTED, TIMED_OUT, KICKED, BANNED
@@ -44,6 +44,7 @@ public class Server implements Runnable {
 		manageClients();
 		receive();
 		Scanner in = new Scanner(System.in);
+		System.out.println("Type /help to get some information\n");
 		while (running) {
 			String text = in.nextLine();
 			if (!text.startsWith("/")) {
@@ -63,15 +64,16 @@ public class Server implements Runnable {
 				raw = !raw;
 				System.out.println((raw ? "Raw mode enabled" : "Raw mode disabled"));
 				break;
-			case "cls":
-				Process p;
-				try {
-					p = Runtime.getRuntime().exec("cls");
-					p.waitFor();
-				} catch (IOException | InterruptedException e) {
-					System.err.println("Cannot run this command");
-				}
-				break;
+//			case "cls":
+//				System.out.flush();
+//				Process p;
+//				try {
+//					p = Runtime.getRuntime().exec("cls");
+//					p.waitFor();
+//				} catch (IOException | InterruptedException e) {
+//					System.err.println("Cannot run this command");
+//				}
+//				break;
 			case "clients":
 				System.out.println("Clients:");
 				System.out.println("===================================");
@@ -116,7 +118,16 @@ public class Server implements Runnable {
 					System.out.println("/" + commands[i]);
 				}
 				break;
+			case "exit":
+				System.out.print("Do you really want to exit? (y/n)   ");
+				Scanner input = new Scanner(System.in);
+				char option = input.nextLine().toLowerCase().charAt(0);
+				if (option == 'y') {
+					System.exit(0);
+				}
+				break;
 			default:
+				System.out.println("Command does not exist!");
 				return;
 		}
 		
@@ -206,7 +217,7 @@ public class Server implements Runnable {
 						disc += "was timed out.";
 						break;
 					case KICKED:
-						send("/d/0", client.ip, client.getID());
+						send("/d/0", client.ip, client.port);
 						disc += "was kicked out of server.";
 						break;
 					case BANNED:
@@ -243,6 +254,12 @@ public class Server implements Runnable {
 			disconnectClient(id, Status.DISCONNECTED);
 		} else if (string.startsWith("/i/")) {
 			response.add(Integer.parseInt(string.substring(3)));
+		} else if (string.startsWith("/u/")) {
+			String message = "/u/";
+			for (ServerClient client : clients) {
+				message += client.name + "(" + client.getID() + ")//";
+			}
+			send(message, packet.getAddress(), packet.getPort());
 		} else {
 			System.out.println(string);
 		}

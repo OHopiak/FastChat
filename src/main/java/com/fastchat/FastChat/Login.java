@@ -28,7 +28,7 @@ public class Login extends JFrame {
 		setResizable(false);
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setSize(300, 360);
+		setSize(205, 295);
 		setLocationRelativeTo(null);
 		
 		setVisible(true);
@@ -44,7 +44,7 @@ public class Login extends JFrame {
 			}
 		});
 		txtName.setToolTipText("Name");
-		txtName.setBounds(77, 44, 140, 20);
+		txtName.setBounds(25, 30, 140, 20);
 		contentPane.add(txtName);
 		txtName.setColumns(10);
 		txtName.requestFocusInWindow(); // requesting focus
@@ -57,7 +57,7 @@ public class Login extends JFrame {
 		});
 		txtAddress.setToolTipText("Address");
 		txtAddress.setColumns(10);
-		txtAddress.setBounds(77, 126, 140, 20);
+		txtAddress.setBounds(25, 90, 140, 20);
 		contentPane.add(txtAddress);
 		
 		txtPort = new JTextField();
@@ -68,7 +68,7 @@ public class Login extends JFrame {
 		});
 		txtPort.setToolTipText("Port");
 		txtPort.setColumns(10);
-		txtPort.setBounds(77, 199, 140, 20);
+		txtPort.setBounds(25, 154, 140, 20);
 		contentPane.add(txtPort);
 		
 		final JButton btnSubmit = new JButton("Submit");
@@ -77,22 +77,22 @@ public class Login extends JFrame {
 				submit();
 			}
 		});
-		btnSubmit.setBounds(102, 271, 89, 23);
+		btnSubmit.setBounds(53, 216, 89, 23);
 		contentPane.add(btnSubmit);
 		
 		JLabel lblName = new JLabel("Name:");
 		lblName.setHorizontalAlignment(SwingConstants.CENTER);
-		lblName.setBounds(124, 25, 46, 14);
+		lblName.setBounds(72, 11, 46, 14);
 		contentPane.add(lblName);
 		
 		JLabel lblAddress = new JLabel("Address:");
 		lblAddress.setHorizontalAlignment(SwingConstants.CENTER);
-		lblAddress.setBounds(124, 108, 46, 14);
+		lblAddress.setBounds(72, 72, 46, 14);
 		contentPane.add(lblAddress);
 		
 		JLabel lblPort = new JLabel("Port:");
 		lblPort.setHorizontalAlignment(SwingConstants.CENTER);
-		lblPort.setBounds(124, 180, 46, 14);
+		lblPort.setBounds(72, 135, 46, 14);
 		contentPane.add(lblPort);
 		txtName.setText("Orest");
 		txtAddress.setText("localhost");

@@ -67,7 +67,6 @@ public class Client {
 	
 	protected void disconnect(int id) {
 		running = false;
-		send("/d/" + id);
 		//socket.close();
 		if (kicked || banned) {
 			Login.getCurrentLogin().setVisible(true);
@@ -79,6 +78,7 @@ public class Client {
 			kicked = false;
 			banned = false;
 		} else {
+			send("/d/" + id);
 			System.exit(0);
 		}
 	}

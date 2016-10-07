@@ -19,6 +19,7 @@ public class OnlineUsers extends JFrame {
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setSize(278, 409);
 		setLocationRelativeTo(null);
+		setTitle("Users Online");
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
