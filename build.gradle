@@ -1,0 +1,23 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+
+group = 'com.fastchat'
+version = '0.0.1-SNAPSHOT'
+
+description = """FastChat"""
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+tasks.withType(JavaCompile) {
+	options.encoding = 'UTF-8'
+}
+
+repositories {
+     maven { url "http://jcenter.bintray.com" }
+     maven { url "http://repo.maven.apache.org/maven2" }
+}
+
+dependencies {
+    testCompile group: 'org.testng', name: 'testng', version:'6.9.12'
+}

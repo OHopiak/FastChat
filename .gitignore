@@ -1,3 +1,8 @@
 target/
 .idea/
 FastChat.iml
+.gradle
+gradlew
+gradlew.bat
+build
+gradle
