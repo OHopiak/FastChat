@@ -1,16 +1,10 @@
 package com.fastchat.FastChat;
 
-import java.awt.EventQueue;
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
-import javax.swing.border.EmptyBorder;
 
 public class Login extends JFrame {
 	
@@ -125,7 +119,7 @@ public class Login extends JFrame {
 			}
 		});
 	}
-	
+
 	public static Login getCurrentLogin() {
 		return currentLogin;
 	}

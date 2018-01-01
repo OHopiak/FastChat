@@ -5,9 +5,24 @@
 	<groupId>com.fastchat</groupId>
 	<artifactId>FastChat</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.7</source>
+					<target>1.7</target>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
 	<packaging>jar</packaging>
 
 	<name>FastChat</name>
+
 	<url>http://maven.apache.org</url>
 
 	<properties>
@@ -21,6 +36,7 @@
 			<url>http://jcenter.bintray.com</url>
 		</repository>
 	</repositories>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.testng</groupId>

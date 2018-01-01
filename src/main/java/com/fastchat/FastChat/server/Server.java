@@ -1,63 +1,70 @@
 package com.fastchat.FastChat.server;
 
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.SocketException;
+import java.net.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 public class Server implements Runnable {
-	
+
 	private final int MAX_ATTEMPTS = 4;
-	private List<ServerClient> clients = new ArrayList<ServerClient>();
-	private ArrayList<Integer> response = new ArrayList<Integer>();
-	
+	private static final String[] commands = {"clients", /*"cls",*/ "help", "kick", "raw", "exit"};
+	private List<ServerClient> clients = new ArrayList<>();
+
 	private DatagramSocket socket;
+
 	private int port;
-	private Thread run, manage, send, receive;
+	private ArrayList<Integer> response = new ArrayList<>();
 	private boolean running;
 	private boolean raw;
-	private static final String[] commands = { "clients", /*"cls",*/ "help", "kick", "raw", "exit" };
-	
-	private static enum Status {
-		DISCONNECTED, TIMED_OUT, KICKED, BANNED
-	};
-	
-	public Server(int port) {
-		System.out.println("Server started at port " + port);
+	@SuppressWarnings("FieldCanBeLocal")
+	private Thread run, manage, send, receive;
+
+	Server(int port, String address) {
+		System.out.printf("Server started at %s:%d\n", address, port);
 		this.port = port;
 		try {
-			socket = new DatagramSocket(this.port);
-		} catch (SocketException e) {
+			socket = new DatagramSocket(this.port, InetAddress.getByName(address));
+		} catch (SocketException | UnknownHostException e) {
 			e.printStackTrace();
 			return;
 		}
 		run = new Thread(this, "Server");
 		run.start();
 	}
-	
+
 	public void run() {
 		running = true;
 		manageClients();
 		receive();
 		Scanner in = new Scanner(System.in);
-		System.out.println("Type /help to get some information\n");
+		System.out.println("Type /help to get some information");
 		while (running) {
-			String text = in.nextLine();
+			System.out.print("> ");
+			String text;
+
+			try {
+				text = in.nextLine();
+			} catch (NoSuchElementException e) {
+				// Ctrl-D used
+				System.exit(0);
+				continue;
+			}
+
 			if (!text.startsWith("/")) {
 				sendToAll("/m/Server: " + text + "/e/");
 				System.out.println("/m/Server: " + text + "/e/");
 				continue;
 			}
+
 			text = text.substring(1);
 			command(text);
 		}
 		if (!running) in.close();
 	}
-	
+
 	private void command(String text) {
 		switch (text.split(" ")[0]) {
 			case "raw":
@@ -114,8 +121,8 @@ public class Server implements Runnable {
 				break;
 			case "help":
 				System.out.println("Available commands: ");
-				for (int i = 0; i < commands.length; i++) {
-					System.out.println("/" + commands[i]);
+				for (String command : commands) {
+					System.out.println("/" + command);
 				}
 				break;
 			case "exit":
@@ -128,11 +135,10 @@ public class Server implements Runnable {
 				break;
 			default:
 				System.out.println("Command does not exist!");
-				return;
 		}
-		
+
 	}
-	
+
 	private void manageClients() {
 		manage = new Thread("Manage") {
 			public void run() {
@@ -143,8 +149,7 @@ public class Server implements Runnable {
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
-					for (int i = 0; i < clients.size(); i++) {
-						ServerClient c = clients.get(i);
+					for (ServerClient c : clients) {
 						if (!response.contains(c.getID())) {
 							if (c.attempt >= MAX_ATTEMPTS) {
 								disconnectClient(c.getID(), Status.TIMED_OUT);
@@ -161,7 +166,37 @@ public class Server implements Runnable {
 		};
 		manage.start();
 	}
-	
+
+	private void process(DatagramPacket packet) {
+		String string = new String(packet.getData());
+		string = string.split("/e/")[0];
+		if (raw) System.out.println(string);
+		if (string.startsWith("/c/")) {
+			String name = string.substring(3);
+			ServerClient client = new ServerClient(name, packet.getAddress(), packet.getPort());
+			clients.add(client);
+			System.out.println(client + " has connected");
+			sendToAll(client.name + "(" + client.getID() + ") has connected");
+			send("/c/" + client.getID(), client.ip, client.port);
+		} else if (string.startsWith("/m/")) {
+			System.out.println(string);
+			sendToAll(string);
+		} else if (string.startsWith("/d/")) {
+			int id = Integer.parseInt(string.substring(3));
+			disconnectClient(id, Status.DISCONNECTED);
+		} else if (string.startsWith("/i/")) {
+			response.add(Integer.parseInt(string.substring(3)));
+		} else if (string.startsWith("/u/")) {
+			StringBuilder message = new StringBuilder("/u/");
+			for (ServerClient client : clients) {
+				message.append(client.name).append("(").append(client.getID()).append(")//");
+			}
+			send(message.toString(), packet.getAddress(), packet.getPort());
+		} else {
+			System.out.println(string);
+		}
+	}
+
 	private void receive() {
 		receive = new Thread("Receive") {
 			public void run() {
@@ -179,7 +214,7 @@ public class Server implements Runnable {
 		};
 		receive.start();
 	}
-	
+
 	private void send(final byte[] data, final InetAddress address, final int port) {
 		send = new Thread("Send") {
 			public void run() {
@@ -193,18 +228,18 @@ public class Server implements Runnable {
 		};
 		send.start();
 	}
-	
+
 	private void send(String message, InetAddress ip, int port) {
 		message += "/e/";
 		send(message.getBytes(), ip, port);
 	}
-	
+
 	private void sendToAll(String string) {
 		for (ServerClient client : clients) {
 			send(string, client.ip, client.port);
 		}
 	}
-	
+
 	private void disconnectClient(int id, Status status) {
 		for (ServerClient client : clients) {
 			if (client.getID() == id) {
@@ -229,40 +264,15 @@ public class Server implements Runnable {
 				System.out.println(disc);
 				sendToAll(disc);
 				break;
-			} else {
-				continue;
 			}
 		}
 	}
-	
-	private void process(DatagramPacket packet) {
-		String string = new String(packet.getData());
-		string = string.split("/e/")[0];
-		if (raw) System.out.println(string);
-		if (string.startsWith("/c/")) {
-			String name = string.substring(3);
-			ServerClient client = new ServerClient(name, packet.getAddress(), packet.getPort());
-			clients.add(client);
-			System.out.println(client + " has connected");
-			sendToAll(client.name + "(" + client.getID() + ") has connected");
-			send("/c/" + client.getID(), client.ip, client.port);
-		} else if (string.startsWith("/m/")) {
-			System.out.println(string);
-			sendToAll(string);
-		} else if (string.startsWith("/d/")) {
-			int id = Integer.parseInt(string.substring(3));
-			disconnectClient(id, Status.DISCONNECTED);
-		} else if (string.startsWith("/i/")) {
-			response.add(Integer.parseInt(string.substring(3)));
-		} else if (string.startsWith("/u/")) {
-			String message = "/u/";
-			for (ServerClient client : clients) {
-				message += client.name + "(" + client.getID() + ")//";
-			}
-			send(message, packet.getAddress(), packet.getPort());
-		} else {
-			System.out.println(string);
-		}
+
+	public int getPort() {
+		return port;
 	}
-	
+
+	private enum Status {
+		DISCONNECTED, TIMED_OUT, KICKED, BANNED
+	}
 }
