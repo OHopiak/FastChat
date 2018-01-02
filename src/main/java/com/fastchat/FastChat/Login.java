@@ -109,13 +109,11 @@ public class Login extends JFrame {
 	}
 	
 	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					currentLogin = new Login();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+		EventQueue.invokeLater(() -> {
+			try {
+				currentLogin = new Login();
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		});
 	}
