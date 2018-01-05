@@ -14,6 +14,7 @@ pipeline {
     stage('deploy') {
       steps {
         sh 'gradle build'
+        archiveArtifacts '**/build/libs/*.jar'
       }
     }
   }
