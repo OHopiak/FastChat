@@ -3,19 +3,17 @@ pipeline {
   stages {
     stage('build') {
       steps {
-        sh 'gradle build'
+        sh 'gradle assemble'
       }
     }
     stage('test') {
-      agent any
       steps {
         sh 'gradle test'
       }
     }
     stage('deploy') {
-      agent any
       steps {
-        sh 'gradle assemble'
+        sh 'gradle build'
       }
     }
   }
