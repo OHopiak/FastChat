@@ -9,7 +9,7 @@ pipeline {
     stage('test') {
       steps {
         sh 'gradle test'
-        junit '**/build/test-results/**/*.xml'
+        junit(testResults: '**/build/test-results/**/*.xml', allowEmptyResults: true)
       }
     }
     stage('deploy') {
