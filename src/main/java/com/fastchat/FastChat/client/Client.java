@@ -1,4 +1,4 @@
-package com.fastchat.FastChat;
+package com.fastchat.FastChat.client;
 
 import java.io.IOException;
 import java.net.DatagramPacket;

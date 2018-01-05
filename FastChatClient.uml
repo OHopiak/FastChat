@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement />
+  <nodes>
+    <node x="0.0" y="358.0">com.fastchat.FastChat.Login</node>
+    <node x="134.72222222222223" y="633.0">com.fastchat.FastChat.Client</node>
+    <node x="566.2222222222222" y="301.0">com.fastchat.FastChat.ClientWindow</node>
+    <node x="116.88888888888889" y="0.0">com.fastchat.FastChat.OnlineUsers</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="com.fastchat.FastChat.ClientWindow" target="com.fastchat.FastChat.OnlineUsers">
+      <point x="-66.25" y="-88.5" />
+      <point x="157.4722222222222" y="106.0" />
+      <point x="170.88888888888889" y="106.0" />
+      <point x="-54.0" y="40.5" />
+    </edge>
+    <edge source="com.fastchat.FastChat.Login" target="com.fastchat.FastChat.ClientWindow">
+      <point x="97.33333333333331" y="-112.5" />
+      <point x="243.33333333333331" y="333.0" />
+      <point x="223.7222222222222" y="333.0" />
+      <point x="0.0" y="88.5" />
+    </edge>
+    <edge source="com.fastchat.FastChat.Client" target="com.fastchat.FastChat.Login">
+      <point x="-89.0" y="-173.0" />
+      <point x="179.22222222222223" y="608.0" />
+      <point x="146.0" y="608.0" />
+      <point x="0.0" y="112.5" />
+    </edge>
+    <edge source="com.fastchat.FastChat.ClientWindow" target="com.fastchat.FastChat.Client">
+      <point x="53.0" y="88.5" />
+      <point x="276.7222222222222" y="333.0" />
+      <point x="302.5" y="333.0" />
+      <point x="302.5" y="608.0" />
+      <point x="268.22222222222223" y="608.0" />
+      <point x="0.0" y="-173.0" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="0.4" x="480.0" y="334.75" />
+  <SelectedNodes>
+    <node>com.fastchat.FastChat.ClientWindow</node>
+  </SelectedNodes>
+  <Categories>
+    <Category>Properties</Category>
+    <Category>Methods</Category>
+    <Category>Constructors</Category>
+  </Categories>
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>private</VISIBILITY>
+</Diagram>
+

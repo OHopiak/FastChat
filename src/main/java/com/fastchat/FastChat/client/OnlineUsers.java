@@ -1,4 +1,4 @@
-package com.fastchat.FastChat;
+package com.fastchat.FastChat.client;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;

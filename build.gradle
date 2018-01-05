@@ -12,9 +12,14 @@ targetCompatibility = 1.8
 jar {
 	manifest {
 		attributes 'Implementation-Title': 'Fastchat',
-				'Implementation-Version': version
+				'Implementation-Version': version,
+				'Main-Class': 'com.fastchat.FastChat.client.Login'
 		
 	}
+}
+
+test {
+	useTestNG(){}
 }
 
 repositories {

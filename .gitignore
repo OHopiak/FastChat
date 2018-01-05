@@ -1,9 +1,16 @@
+# Custom
+
+# Maven
 target/
+
+# IntelliJ
 .idea/
+out
 main.iml
+
+# Gradle
 .gradle
+gradle
 gradlew
 gradlew.bat
 build
-gradle
-out

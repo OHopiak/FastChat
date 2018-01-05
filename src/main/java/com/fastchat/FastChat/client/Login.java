@@ -1,4 +1,4 @@
-package com.fastchat.FastChat;
+package com.fastchat.FastChat.client;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
