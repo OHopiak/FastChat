@@ -8,9 +8,8 @@ pipeline {
     }
     stage('test') {
       steps {
-        sh '''rm -fr **/build/test-results
-gradle test'''
-        junit '**/build/test-results/**/*.xml'
+        sh 'gradle test'
+        junit(testResults: '**/build/test-results/**/*.xml', allowEmptyResults: true)
       }
     }
     stage('deploy') {
