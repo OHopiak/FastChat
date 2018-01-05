@@ -4,7 +4,7 @@ apply plugin: 'maven'
 group = 'com.fastchat'
 version = '0.0.1-SNAPSHOT'
 
-description = """FastChat"""
+description = """FastChat - a tool for instant chatting that not always works as expected - WIP"""
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
