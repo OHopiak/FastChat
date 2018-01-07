@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+echo "TEST"
+gradle test
+
+echo -e "\e[1mPerformance tests\e[0m"
+echo "    Testing server:"
+echo -e "/exit\ny" | ./scripts/server
+echo -e "/exit\nn\n/exit\ny" | ./scripts/server
+echo -e "/exit\nn\n/exit\ny" | ./scripts/server

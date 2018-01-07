@@ -2,7 +2,7 @@ apply plugin: 'java'
 apply plugin: 'maven'
 
 group = 'com.fastchat'
-version = '0.0.1-SNAPSHOT'
+version = '0.0.1'
 
 description = """FastChat - a tool for instant chatting that not always works as expected - WIP"""
 
@@ -32,4 +32,11 @@ repositories {
 
 dependencies {
 	testCompile group: 'org.testng', name: 'testng', version: '6.9.12'
+}
+
+task printJarName{
+	dependsOn 'jar'
+	doLast {
+		println "${project.name}-${project.version}.jar"
+	}
 }

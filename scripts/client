@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+PROJECT_DIR="`dirname $0`/.."
+LIB_DIR="${PROJECT_DIR}/build/libs"
+JAR_NAME="`gradle printJarName -q`"
+if [[ -d "$LIB_DIR" ]]; then
+    cd ${LIB_DIR}
+    java -jar ${JAR_NAME}
+fi

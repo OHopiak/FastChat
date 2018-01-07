@@ -7,8 +7,7 @@ public class Loader {
 
 	private static final String usageString = "Usage: java -jar FastChat.jar [ -s [PORT] [IP] ]";
 	private static final String description =
-			"This is really cool tool for chatting" +
-					"run without arguments to launch the client";
+			"This is really cool tool for chatting\nrun without arguments to launch the client";
 
 	private static void usage() {
 		System.out.println(usageString);
@@ -24,7 +23,6 @@ public class Loader {
 
 		System.out.println(helpString);
 	}
-
 
 	public static void main(String[] args) {
 		if (args.length == 0) {
@@ -50,4 +48,5 @@ public class Loader {
 			System.exit(1);
 		}
 	}
+
 }
