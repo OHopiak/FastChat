@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement />
+  <nodes>
+    <node x="488.0" y="645.0">com.fastchat.FastChat.server.ServerMain</node>
+    <node x="0.0" y="645.0">com.fastchat.FastChat.Loader</node>
+    <node x="318.0" y="0.0">com.fastchat.FastChat.client.Client</node>
+    <node x="0.0" y="400.0">com.fastchat.FastChat.client.Login</node>
+    <node x="92.5" y="323.0">com.fastchat.FastChat.server.Server.Status</node>
+    <node x="0.0" y="0.0">com.fastchat.FastChat.server.Server</node>
+    <node x="227.0" y="645.0">com.fastchat.FastChat.client.OnlineUsers</node>
+    <node x="576.0" y="400.0">com.fastchat.FastChat.server.ServerClient</node>
+    <node x="337.0" y="400.0">com.fastchat.FastChat.client.ClientWindow</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="com.fastchat.FastChat.server.Server.Status" target="com.fastchat.FastChat.server.Server">
+      <point x="0.0" y="-16.0" />
+      <point x="0.0" y="136.5" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="1.0" x="172.0" y="360.0" />
+  <SelectedNodes />
+  <Categories>
+    <Category>Inner Classes</Category>
+    <Category>Properties</Category>
+    <Category>Methods</Category>
+  </Categories>
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>private</VISIBILITY>
+</Diagram>
+

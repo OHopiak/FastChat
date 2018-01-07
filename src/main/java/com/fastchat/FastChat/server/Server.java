@@ -22,7 +22,7 @@ public class Server implements Runnable {
 	@SuppressWarnings("FieldCanBeLocal")
 	private Thread run, manage, send, receive;
 
-	Server(int port, String address) {
+	public Server(int port, String address) {
 		System.out.printf("Server started at %s:%d\n", address, port);
 		this.port = port;
 		try {

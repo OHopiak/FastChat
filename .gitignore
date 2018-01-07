@@ -6,7 +6,7 @@ target/
 # IntelliJ
 .idea/
 out
-main.iml
+*.iml
 
 # Gradle
 .gradle
