@@ -40,7 +40,7 @@ public class Server implements Runnable {
 		manageClients();
 		receive();
 		Scanner in = new Scanner(System.in);
-		System.out.println("Type /help to get some information");
+		System.out.println("Type /help to get more information");
 		while (running) {
 			System.out.print("> ");
 			String text;
