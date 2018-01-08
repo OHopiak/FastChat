@@ -1,13 +1,16 @@
 package com.fastchat.FastChat;
 
-import com.fastchat.FastChat.client.Login;
+import com.fastchat.FastChat.client.ClientGUI;
 import com.fastchat.FastChat.server.Server;
+import com.fastchat.FastChat.util.Localization;
 
 public class Loader {
 
 	private static final String usageString = "Usage: java -jar FastChat.jar [ -s [PORT] [IP] ]";
 	private static final String description =
 			"This is really cool tool for chatting\nrun without arguments to launch the client";
+
+//	private static Class clientClass;
 
 	private static void usage() {
 		System.out.println(usageString);
@@ -25,8 +28,12 @@ public class Loader {
 	}
 
 	public static void main(String[] args) {
+
+		Localization.autoSetLocale();
+//		Localization.setLocale(new Locale("uk"));
+
 		if (args.length == 0) {
-			Login.main(args);
+			ClientGUI gui = ClientGUI.getInstance();
 		} else if (args.length <= 3) {
 			if (args[0].equals("-h") || args[0].equals("--help")) {
 				help();

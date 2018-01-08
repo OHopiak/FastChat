@@ -1,5 +1,4 @@
 apply plugin: 'java'
-apply plugin: 'maven'
 
 group = 'com.fastchat'
 version = '0.0.1'
@@ -26,15 +25,15 @@ test {
 }
 
 repositories {
-	maven { url "http://jcenter.bintray.com" }
-	maven { url "http://repo.maven.apache.org/maven2" }
+	jcenter()
 }
 
 dependencies {
-	testCompile group: 'org.testng', name: 'testng', version: '6.9.12'
+	compile 'com.intellij:forms_rt:7.0.3'
+	testCompile 'org.testng:testng:6.9.12'
 }
 
-task printJarName{
+task printJarName {
 	dependsOn 'jar'
 	doLast {
 		println "${project.name}-${project.version}.jar"
