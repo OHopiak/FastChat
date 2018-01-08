@@ -8,8 +8,9 @@ pipeline {
     }
     stage('test') {
       steps {
-        sh 'gradle test'
+        sh 'gradle check jacoco'
         junit(testResults: '**/build/test-results/**/*.xml', allowEmptyResults: true)
+        jacoco(execPattern: '**/build/**.exec')
       }
     }
     stage('deploy') {
