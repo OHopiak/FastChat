@@ -1,4 +1,5 @@
 apply plugin: 'java'
+apply plugin: 'jacoco'
 
 group = 'com.fastchat'
 version = '0.0.1'
@@ -46,5 +47,13 @@ task printJarName {
 	dependsOn 'jar'
 	doLast {
 		println "${project.name}-${project.version}.jar"
+	}
+}
+
+jacocoTestReport{
+	reports {
+		html.enabled true
+		xml.enabled true
+		csv.enabled true
 	}
 }
