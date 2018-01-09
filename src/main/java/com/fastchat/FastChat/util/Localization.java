@@ -46,6 +46,9 @@ public class Localization {
 			case "uk":
 				setBundle("ukrainian");
 				break;
+			case "nb":
+				setBundle("norwegian");
+				break;
 			default:
 				setBundle("default");
 		}

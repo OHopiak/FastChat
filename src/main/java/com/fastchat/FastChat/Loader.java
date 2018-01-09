@@ -1,8 +1,11 @@
 package com.fastchat.FastChat;
 
-import com.fastchat.FastChat.client.ClientGUI;
+import com.fastchat.FastChat.client.LoginGUI;
+import com.fastchat.FastChat.client.LoginInterface;
 import com.fastchat.FastChat.server.Server;
 import com.fastchat.FastChat.util.Localization;
+
+import java.awt.*;
 
 public class Loader {
 
@@ -29,11 +32,17 @@ public class Loader {
 
 	public static void main(String[] args) {
 
-		Localization.autoSetLocale();
-//		Localization.setLocale(new Locale("uk"));
+		Localization.autoSetLocale();                //English
+//		Localization.setLocale(new Locale("uk"));	//Ukrainian
+//		Localization.setLocale(new Locale("nb"));	//Norwegian
 
 		if (args.length == 0) {
-			ClientGUI gui = ClientGUI.getInstance();
+//			EventQueue.invokeLater(Login::getCurrentLogin);
+			EventQueue.invokeLater(() -> {
+				System.out.println("[*] Starting Login");
+				LoginInterface login = new LoginGUI();
+
+			});
 		} else if (args.length <= 3) {
 			if (args[0].equals("-h") || args[0].equals("--help")) {
 				help();

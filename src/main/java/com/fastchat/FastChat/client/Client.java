@@ -61,8 +61,8 @@ public class Client {
 		running = false;
 		//socket.close();
 		if (kicked || banned) {
-			Login.getCurrentLogin().setVisible(true);
-			Login.getClientWindow().setVisible(false);
+//			((LoginGUI)LoginGUI.getCurrentLogin()).reset();
+//			((ClientGUI)LoginGUI.getClientInterface()).getFrame().setVisible(false);
 			JOptionPane.showMessageDialog(null,
 					(kicked ? "You were kicked out of server\nTry to reconnect again"
 							: "You were banned on this server!\nYou can't reconnect unless the server restarts!"),

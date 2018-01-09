@@ -8,6 +8,10 @@ description = """FastChat - a tool for instant chatting that not always works as
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
+configurations {
+	libraries
+}
+
 jar {
 	manifest {
 		attributes(
@@ -16,6 +20,9 @@ jar {
 				'Main-Class': 'com.fastchat.FastChat.Loader',
 		)
 
+	}
+	from {
+		configurations.libraries.collect { it.isDirectory() ? it : zipTree(it) }
 	}
 }
 
@@ -29,8 +36,10 @@ repositories {
 }
 
 dependencies {
-	compile 'com.intellij:forms_rt:7.0.3'
+	libraries 'com.jgoodies:jgoodies-forms:1.6.0'
+//	libraries 'com.intellij:forms_rt:7.0.3'
 	testCompile 'org.testng:testng:6.9.12'
+	configurations.compile.extendsFrom(configurations.libraries)
 }
 
 task printJarName {

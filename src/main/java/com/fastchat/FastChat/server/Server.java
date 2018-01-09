@@ -22,6 +22,10 @@ public class Server implements Runnable {
 	@SuppressWarnings("FieldCanBeLocal")
 	private Thread run, manage, send, receive;
 
+	private enum Status {
+		DISCONNECTED, TIMED_OUT, KICKED, BANNED
+	}
+
 	public Server(int port, String address) {
 		System.out.printf("Server started at %s:%d\n", address, port);
 		this.port = port;
@@ -270,9 +274,5 @@ public class Server implements Runnable {
 
 	public int getPort() {
 		return port;
-	}
-
-	private enum Status {
-		DISCONNECTED, TIMED_OUT, KICKED, BANNED
 	}
 }

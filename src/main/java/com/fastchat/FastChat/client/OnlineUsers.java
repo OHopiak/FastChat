@@ -1,12 +1,10 @@
 package com.fastchat.FastChat.client;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
+import com.fastchat.FastChat.util.Localization;
 
-import javax.swing.JFrame;
-import javax.swing.JList;
-import javax.swing.JPanel;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import java.awt.*;
 
 public class OnlineUsers extends JFrame {
 	
@@ -19,7 +17,7 @@ public class OnlineUsers extends JFrame {
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setSize(278, 409);
 		setLocationRelativeTo(null);
-		setTitle("Users Online");
+		setTitle(Localization.get("menu_bar_online_users"));
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
