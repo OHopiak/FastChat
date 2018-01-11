@@ -1,11 +1,5 @@
 FROM gradle:latest
 
-ENV GRADLE_BUILD_DIR /home/gradle/workspace
-
-COPY . ${GRADLE_BUILD_DIR}
-
 USER root
-RUN chown gradle:gradle -R ${GRADLE_BUILD_DIR}
+RUN mkdir /opt/artifacts && chown -R gradle:gradle /opt/artifacts
 USER gradle
-
-WORKDIR ${GRADLE_BUILD_DIR}
