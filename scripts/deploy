@@ -2,8 +2,7 @@
 set -e
 
 VERBOSE="true"
-# artifacts_dir="/opt/artifacts"
-artifacts_dir="build/artifacts"
+artifacts_dir="/opt/artifacts"
 
 function info (){
 	[ -n "$VERBOSE" ] && echo -e "\e[1;34m[*]\e[39m $@\e[0m"
