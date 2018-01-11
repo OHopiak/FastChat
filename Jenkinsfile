@@ -1,5 +1,11 @@
 pipeline {
-  agent any
+  agent {
+    docker {
+      image 'gradle_runner'
+      args 'bash'
+    }
+    
+  }
   stages {
     stage('build') {
       steps {
