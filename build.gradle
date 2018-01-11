@@ -43,6 +43,18 @@ dependencies {
 	configurations.compile.extendsFrom(configurations.libraries)
 }
 
+jacocoTestReport{
+	reports {
+		html.enabled true
+		xml.enabled true
+		csv.enabled true
+	}
+}
+
+javadoc{
+	failOnError = false
+}
+
 task printJarName {
 	dependsOn 'jar'
 	doLast {
@@ -50,10 +62,9 @@ task printJarName {
 	}
 }
 
-jacocoTestReport{
-	reports {
-		html.enabled true
-		xml.enabled true
-		csv.enabled true
+task printArtifactsDirectory {
+	dependsOn 'jar'
+	doLast {
+		println "${project.name}/${project.version}"
 	}
 }

@@ -1,2 +1,31 @@
 #!/usr/bin/env bash
-echo "DEPLOY"
+set -e
+
+VERBOSE="true"
+# artifacts_dir="/opt/artifacts"
+artifacts_dir="build/artifacts"
+
+function info (){
+	[ -n "$VERBOSE" ] && echo -e "\e[1;34m[*]\e[39m $@\e[0m"
+}
+
+function error () {
+	echo -e "\e[1;31m[!]\e[39m $@\e[0m" 1>&2
+}
+
+if [ ! -d "$artifacts_dir" ]; then
+	error "Directory $artifacts_dir doesn't exist"
+	exit 1
+fi
+
+version_dir="${artifacts_dir}/`gradle printArtifactsDirectory -q 2>/dev/null | sed -e 's/\.\.//g'`"
+artifact_jar="build/libs/`gradle printJarName -q 2>/dev/null`"
+artifact_docs="build/docs/javadoc"
+artifact_tests="build/reports/tests/test"
+
+mkdir -p $version_dir
+cp -r $artifact_jar $version_dir
+cp -r $artifact_docs $version_dir/docs
+cp -r $artifact_tests $version_dir/tests
+
+
