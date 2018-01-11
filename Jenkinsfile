@@ -1,5 +1,10 @@
 pipeline {
-  agent any
+  agent {
+    node {
+      label 'gradle'
+    }
+    
+  }
   stages {
     stage('build') {
       steps {
@@ -8,7 +13,7 @@ pipeline {
     }
     stage('test') {
       steps {
-        sh 'gradle check jacoco'
+        sh 'gradle check jacocoTestReport'
         junit(testResults: '**/build/test-results/**/*.xml', allowEmptyResults: true)
         jacoco(execPattern: '**/build/**.exec')
       }
@@ -17,6 +22,7 @@ pipeline {
       steps {
         sh 'gradle build'
         archiveArtifacts '**/build/libs/*.jar'
+        sh './scripts/deploy'
       }
     }
   }
