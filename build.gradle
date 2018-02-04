@@ -40,3 +40,10 @@ task printJarName{
 		println "${project.name}-${project.version}.jar"
 	}
 }
+
+task printArtifactsDirectory {
+	dependsOn 'jar'
+	doLast {
+		println "${project.name}/${project.version}"
+	}
+}
