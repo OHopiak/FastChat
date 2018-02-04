@@ -2,7 +2,7 @@ apply plugin: 'java'
 apply plugin: 'jacoco'
 
 group = 'com.fastchat'
-version = '0.0.1'
+version = '0.0.2'
 
 description = """FastChat - a tool for instant chatting that not always works as expected - WIP"""
 
