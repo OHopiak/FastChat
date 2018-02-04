@@ -12,7 +12,7 @@ public class OnlineUsers extends JFrame {
 	private JPanel contentPane;
 	private JList<String> list;
 
-	public OnlineUsers() {
+	OnlineUsers() {
 		setType(Type.UTILITY);
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setSize(278, 409);

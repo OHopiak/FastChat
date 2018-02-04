@@ -11,13 +11,13 @@ public class ServerClient {
 	public int port;
 	private final int ID;
 	public int attempt = 0;
-	private static ArrayList<Integer> identifiers = new ArrayList<Integer>();
+	private static ArrayList<Integer> identifiers = new ArrayList<>();
 	
 	public int getID() {
 		return ID;
 	}
-	
-	public ServerClient(String name, InetAddress ip, int port) {
+
+	ServerClient(String name, InetAddress ip, int port) {
 		super();
 		this.name = name;
 		this.ip = ip;
