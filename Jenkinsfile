@@ -20,7 +20,7 @@ pipeline {
     }
     stage('deploy') {
       steps {
-        sh 'gradle build'
+        sh 'gradle build javadoc'
         archiveArtifacts '**/build/libs/*.jar'
         sh './scripts/deploy'
       }
