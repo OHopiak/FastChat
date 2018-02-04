@@ -1,5 +1,7 @@
 package com.fastchat.FastChat.client;
 
+import com.fastchat.FastChat.util.Networking;
+
 import javax.swing.*;
 import java.io.IOException;
 import java.net.*;
@@ -12,7 +14,13 @@ public class Client {
 	private DatagramSocket socket;
 	private InetAddress ip;
 	private Thread send;
-	private boolean running, kicked = false, banned = false;
+	private boolean running = false, kicked = false, banned = false;
+
+	Client(String name, int port) {
+		super();
+		this.name = name;
+		this.port = port;
+	}
 
 	protected boolean openConnection(String address) {
 		try {
@@ -39,16 +47,7 @@ public class Client {
 	}
 
 	private void send(final byte[] data) {
-		send = new Thread("Send") {
-			public void run() {
-				DatagramPacket packet = new DatagramPacket(data, data.length, ip, port);
-				try {
-					socket.send(packet);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		};
+		send = Networking.send(socket, data, ip, port);
 		send.start();
 	}
 
@@ -79,12 +78,12 @@ public class Client {
 		return name;
 	}
 
-	public void setID(int iD) {
-		ID = iD;
-	}
-
 	public int getID() {
 		return ID;
+	}
+
+	public void setID(int iD) {
+		ID = iD;
 	}
 
 	public int getPort() {
@@ -93,12 +92,6 @@ public class Client {
 
 	public InetAddress getIp() {
 		return ip;
-	}
-
-	public Client(String name, int port) {
-		super();
-		this.name = name;
-		this.port = port;
 	}
 
 	public boolean isRunning() {

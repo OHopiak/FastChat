@@ -5,13 +5,11 @@ import com.fastchat.FastChat.util.Localization;
 public abstract class ClientInterface implements Runnable {
 
 	Client client;
+	OnlineUsers users;
+	String[] userArr = {"Name(id)"};
 	private Thread run, listen;
-	private OnlineUsers users;
-
 	private String name, address;
 	private int port;
-
-	private String[] userArr = {"Name(id)"};
 
 	ClientInterface() {
 		this("Anon", "localhost", 1234);
@@ -91,6 +89,10 @@ public abstract class ClientInterface implements Runnable {
 	private void serve() {
 		run = new Thread(this, "Run");
 		run.start();
+	}
+
+	public Client getClient() {
+		return client;
 	}
 
 	public Thread getRun() {

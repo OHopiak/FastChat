@@ -9,6 +9,7 @@ description = """FastChat - a tool for instant chatting that not always works as
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
+
 configurations {
 	libraries
 }
@@ -43,15 +44,18 @@ dependencies {
 	configurations.compile.extendsFrom(configurations.libraries)
 }
 
-jacocoTestReport{
+jacocoTestReport {
 	reports {
+		//noinspection GroovyAssignabilityCheck
 		html.enabled true
+		//noinspection GroovyAssignabilityCheck
 		xml.enabled true
+		//noinspection GroovyAssignabilityCheck
 		csv.enabled true
 	}
 }
 
-javadoc{
+javadoc {
 	failOnError = false
 }
 

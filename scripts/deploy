@@ -27,4 +27,3 @@ cp -r $artifact_jar $version_dir
 cp -r $artifact_docs $version_dir/docs
 cp -r $artifact_tests $version_dir/tests
 
-
