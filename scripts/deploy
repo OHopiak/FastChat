@@ -23,7 +23,8 @@ artifact_docs="build/docs/javadoc"
 artifact_tests="build/reports/tests/test"
 
 mkdir -p $version_dir
-cp -r $artifact_jar $version_dir
+cp -r $artifact_jar $version_dir/
 cp -r $artifact_docs $version_dir/docs
 cp -r $artifact_tests $version_dir/tests
+cp meta.conf.* $version_dir/
 
