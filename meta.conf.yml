@@ -1,0 +1,9 @@
+name: FastChat
+language: java
+framework: JavaSE
+execution:
+  default: client
+  configs:
+  - name: client
+    args: -s
+  - name: client
