@@ -1,0 +1,20 @@
+{
+    "name": "FastChat",
+    "language": "java",
+    "framework": "JavaSE",
+    "type": "jar",
+    "execution": {
+        "default": "client",
+        "configs": [
+            {
+                "name": "server",
+                "args": [
+                    "-s"
+                ]
+            },
+            {
+                "name": "client"
+            }
+        ]
+    }
+}

@@ -6,5 +6,6 @@ execution:
   default: client
   configs:
   - name: client
-    args: -s
-  - name: client
+  - name: server
+    args:
+    - -s
