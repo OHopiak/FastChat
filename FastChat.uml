@@ -2,39 +2,15 @@
 <Diagram>
   <ID>JAVA</ID>
   <OriginalElement />
-  <nodes>
-    <node x="167.0" y="318.0">com.fastchat.FastChat.Loader</node>
-    <node x="197.0" y="82.0">com.fastchat.FastChat.client.ClientGUI</node>
-    <node x="0.0" y="0.0">com.fastchat.FastChat.client.LoginInterface</node>
-    <node x="15.0" y="82.0">com.fastchat.FastChat.client.LoginGUI</node>
-    <node x="304.0" y="318.0">com.fastchat.FastChat.client.Client</node>
-    <node x="0.0" y="241.0">com.fastchat.FastChat.server.Server.Status</node>
-    <node x="0.0" y="159.0">com.fastchat.FastChat.server.Server</node>
-    <node x="133.0" y="159.0">com.fastchat.FastChat.client.OnlineUsers</node>
-    <node x="0.0" y="318.0">com.fastchat.FastChat.server.ServerClient</node>
-    <node x="182.0" y="0.0">com.fastchat.FastChat.client.ClientInterface</node>
-  </nodes>
+  <nodes />
   <notes />
-  <edges>
-    <edge source="com.fastchat.FastChat.client.LoginGUI" target="com.fastchat.FastChat.client.LoginInterface">
-      <point x="0.0" y="-16.0" />
-      <point x="0.0" y="16.0" />
-    </edge>
-    <edge source="com.fastchat.FastChat.client.ClientGUI" target="com.fastchat.FastChat.client.ClientInterface">
-      <point x="0.0" y="-16.0" />
-      <point x="0.0" y="16.0" />
-    </edge>
-    <edge source="com.fastchat.FastChat.server.Server.Status" target="com.fastchat.FastChat.server.Server">
-      <point x="0.0" y="-16.0" />
-      <point x="0.0" y="16.0" />
-    </edge>
-  </edges>
-  <settings layout="Hierarchic Group" zoom="1.0" x="227.5" y="172.5" />
-  <SelectedNodes>
-    <node>com.fastchat.FastChat.Loader</node>
-  </SelectedNodes>
+  <edges />
+  <settings layout="Hierarchic Group" zoom="1.0" x="228.0" y="173.0" />
+  <SelectedNodes />
   <Categories>
     <Category>Inner Classes</Category>
+    <Category>Fields</Category>
+    <Category>Constructors</Category>
   </Categories>
   <SCOPE>All</SCOPE>
   <VISIBILITY>private</VISIBILITY>
