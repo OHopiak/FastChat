@@ -9,7 +9,7 @@ import static org.testng.Assert.assertTrue;
 
 public class CommandTest {
 
-	Command command = new Command("help", (argv) -> {
+	Command command = new Command("help","", (argv) -> {
 		System.out.print("Do you really need help? ");
 		return null;
 	});

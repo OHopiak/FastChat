@@ -12,8 +12,6 @@ public class Server implements Runnable {
 	private final int MAX_ATTEMPTS = 4;
 	private List<ServerClient> clients = new ArrayList<>();
 
-	private HashMap<String, Command> commands = new HashMap<>();
-
 	private CommandRegistry commandRegistry = new CommandRegistry();
 
 	private DatagramSocket socket;
@@ -86,8 +84,6 @@ public class Server implements Runnable {
 		String[] args = text.split(" ");
 		String commandName = args[0];
 		args = Arrays.copyOfRange(args, 1, args.length);
-		//Command c = commands.get(commandName);
-		//CommandRegistry commandRegistry = new CommandRegistry();
 		this.commandRegistry.run(commandName, args);
 
 	}
@@ -226,7 +222,6 @@ public class Server implements Runnable {
 	}
 
 	private void initCommands() {
-		//CommandRegistry commandRegistry = new CommandRegistry();
 
 		this.commandRegistry.add(new Command("exit", (argv) -> {
 			System.out.print("Do you really want to exit? (y/n)   ");
