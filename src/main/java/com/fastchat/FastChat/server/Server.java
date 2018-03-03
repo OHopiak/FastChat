@@ -1,19 +1,19 @@
 package com.fastchat.FastChat.server;
 
+import com.fastchat.FastChat.util.Command;
+import com.fastchat.FastChat.util.CommandRegistry;
 import com.fastchat.FastChat.util.Networking;
 
 import java.io.IOException;
 import java.net.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Scanner;
+import java.util.*;
 
 public class Server implements Runnable {
 
 	private final int MAX_ATTEMPTS = 4;
-	private static final String[] commands = {"clients", /*"cls",*/ "help", "kick", "raw", "exit"};
 	private List<ServerClient> clients = new ArrayList<>();
+
+	private CommandRegistry commandRegistry = new CommandRegistry();
 
 	private DatagramSocket socket;
 
@@ -38,6 +38,8 @@ public class Server implements Runnable {
 			return;
 		}
 		run = new Thread(this, "Server");
+		initCommands();
+
 		run.start();
 	}
 
@@ -71,77 +73,19 @@ public class Server implements Runnable {
 		if (!running) in.close();
 	}
 
+	/**
+	 * example: "kick 12345432 2345 3456 3456 34567 34567"
+	 * example - split: ["kick", "12345432", "2345", "3456", "3456", "34567", "34567"]
+	 * example - command name: "kick"
+	 * example - argv: ["12345432", "2345", "3456", "3456", "34567", "34567"]
+	 *
+	 * @param text
+	 */
 	private void command(String text) {
-		switch (text.split(" ")[0]) {
-			case "raw":
-				raw = !raw;
-				System.out.println((raw ? "Raw mode enabled" : "Raw mode disabled"));
-				break;
-//			case "cls":
-//				System.out.flush();
-//				Process p;
-//				try {
-//					p = Runtime.getRuntime().exec("cls");
-//					p.waitFor();
-//				} catch (IOException | InterruptedException e) {
-//					System.err.println("Cannot run this command");
-//				}
-//				break;
-			case "clients":
-				System.out.println("Clients:");
-				System.out.println("===================================");
-				for (ServerClient serverClient : clients) {
-					System.out.println(serverClient);
-				}
-				System.out.println("===================================");
-				break;
-			case "kick":
-				String name = text.split(" ")[1];
-				int id = -1;
-				boolean number = true;
-				try {
-					id = Integer.parseInt(name);
-				} catch (NumberFormatException e) {
-					number = false;
-				}
-				if (number) {
-					boolean exists = false;
-					for (ServerClient client : clients) {
-						if (client.getID() == id) {
-							exists = true;
-							break;
-						}
-					}
-					if (exists)
-						disconnectClient(id, Status.KICKED);
-					else
-						System.out.println("Client with id " + id + " does not exist");
-				} else {
-					for (ServerClient client : clients) {
-						if (name.equals(client.name)) {
-							disconnectClient(client.getID(), Status.KICKED);
-							break;
-						}
-					}
-				}
-				break;
-			case "help":
-				System.out.println("Available commands: ");
-				for (String command : commands) {
-					System.out.println("/" + command);
-				}
-				break;
-			case "exit":
-				System.out.print("Do you really want to exit? (y/n)   ");
-				Scanner input = new Scanner(System.in);
-				char option = input.nextLine().toLowerCase().charAt(0);
-				if (option == 'y') {
-					System.exit(0);
-				}
-				break;
-			default:
-				System.out.println("Command does not exist!");
-		}
+		String[] args = text.split(" ");
+		String commandName = args[0];
+		args = Arrays.copyOfRange(args, 1, args.length);
+		this.commandRegistry.run(commandName, args);
 
 	}
 
@@ -267,5 +211,76 @@ public class Server implements Runnable {
 
 	public int getPort() {
 		return port;
+	}
+
+	private void initCommands() {
+
+		this.commandRegistry.add(new Command("exit", (argv) -> {
+			System.out.print("Do you really want to exit? (y/n)   ");
+			Scanner input = new Scanner(System.in);
+			char option = input.nextLine().toLowerCase().charAt(0);
+			if (option == 'y') {
+				System.exit(0);
+			}
+			return null;
+		}));
+
+		this.commandRegistry.add(new Command("help", (argv) -> {
+			System.out.println("Available commands: ");
+			commandRegistry.getCommands().forEach((name, c) ->
+					System.out.println("/" + name + (c.getHelp().isEmpty() ? "" : " - " + c.getHelp()))
+			);
+			return null;
+		}));
+
+		this.commandRegistry.add(new Command("clients", "prints the list of clients", (argv) -> {
+			System.out.println("Clients:");
+			System.out.println("===================================");
+			for (ServerClient serverClient : clients) {
+				System.out.println(serverClient);
+			}
+			System.out.println("===================================");
+			return null;
+		}));
+
+		this.commandRegistry.add(new Command("kick", "kick the list of clients", (argv) -> {
+			for (String name : argv) {
+
+				int id = -1;
+				boolean number = true;
+				try {
+					id = Integer.parseInt(name);
+				} catch (NumberFormatException e) {
+					number = false;
+				}
+				if (number) {
+					boolean exists = false;
+					for (ServerClient client : clients) {
+						if (client.getID() == id) {
+							exists = true;
+							break;
+						}
+					}
+					if (exists)
+						disconnectClient(id, Status.KICKED);
+					else
+						System.out.println("Client with id " + id + " does not exist");
+				} else {
+					for (ServerClient client : clients) {
+						if (name.equals(client.name)) {
+							disconnectClient(client.getID(), Status.KICKED);
+							break;
+						}
+					}
+				}
+			}
+			return null;
+		}));
+
+		this.commandRegistry.add(new Command("raw", "", (argv) -> {
+			raw = !raw;
+			System.out.println((raw ? "Raw mode enabled" : "Raw mode disabled"));
+			return null;
+		}));
 	}
 }
