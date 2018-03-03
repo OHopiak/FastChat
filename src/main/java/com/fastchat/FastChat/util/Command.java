@@ -53,7 +53,5 @@ public class Command {
 
 }
 
-//Java 8 lambda
-//Interface Callable
-//Interface Runnable
+
 
