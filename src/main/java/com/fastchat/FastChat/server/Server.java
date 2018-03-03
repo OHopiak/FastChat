@@ -2,6 +2,7 @@ package com.fastchat.FastChat.server;
 
 import com.fastchat.FastChat.util.Command;
 import com.fastchat.FastChat.util.CommandRegistry;
+import com.fastchat.FastChat.util.Networking;
 
 import java.io.IOException;
 import java.net.*;
@@ -165,16 +166,7 @@ public class Server implements Runnable {
 	}
 
 	private void send(final byte[] data, final InetAddress address, final int port) {
-		send = new Thread("Send") {
-			public void run() {
-				DatagramPacket packet = new DatagramPacket(data, data.length, address, port);
-				try {
-					socket.send(packet);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		};
+		send = Networking.send(socket, data, address, port);
 		send.start();
 	}
 

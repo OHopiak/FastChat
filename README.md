@@ -8,6 +8,7 @@ Jenkins:
 [![Build Status](http://18.194.57.194:8080/job/FastChat/job/master/4/badge/icon)](http://18.194.57.194:8080/job/FastChat/job/master/4/)
 
    This is the simple chatting tool  
+   Feel free to contribute to this project  
 
 Requirements
 ------------

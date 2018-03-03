@@ -5,13 +5,11 @@ import com.fastchat.FastChat.util.Localization;
 public abstract class ClientInterface implements Runnable {
 
 	Client client;
-	private Thread run, listen;
 	private OnlineUsers users;
-
+	private String[] userArr = {"Name(id)"};
+	private Thread run, listen;
 	private String name, address;
 	private int port;
-
-	private String[] userArr = {"Name(id)"};
 
 	ClientInterface() {
 		this("Anon", "localhost", 1234);
@@ -44,6 +42,7 @@ public abstract class ClientInterface implements Runnable {
 			this.serve();
 		}
 		client.send(("/c/" + name));
+		users = new OnlineUsers();
 	}
 
 	protected abstract void send(String message);
@@ -59,6 +58,7 @@ public abstract class ClientInterface implements Runnable {
 			public void run() {
 				while (client.isRunning()) {
 					String message = client.receive();
+//					System.out.println(message);
 					if (message.startsWith("/c/")) {
 						client.setID(Integer.parseInt(message.substring(3)));
 						console("Connection is setted up successfully... ID is " + client.getID());
@@ -79,6 +79,7 @@ public abstract class ClientInterface implements Runnable {
 						message = message.substring(3);
 						userArr = message.split("//");
 						users.updateList(userArr);
+						users.setVisible(true);
 					} else {
 						console("Server: " + message);
 					}
@@ -91,6 +92,10 @@ public abstract class ClientInterface implements Runnable {
 	private void serve() {
 		run = new Thread(this, "Run");
 		run.start();
+	}
+
+	public Client getClient() {
+		return client;
 	}
 
 	public Thread getRun() {
