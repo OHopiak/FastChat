@@ -7,17 +7,13 @@ import com.fastchat.FastChat.util.Localization;
 
 import java.awt.*;
 
-public class Loader {
+class Loader {
 
 	private static final String usageString = "Usage: java -jar FastChat.jar [ -s [PORT] [IP] ]";
 	private static final String description =
 			"This is really cool tool for chatting\nrun without arguments to launch the client";
 
 //	private static Class clientClass;
-
-	private static void usage() {
-		System.out.println(usageString);
-	}
 
 	private static void help() {
 		String helpString = usageString + "\n" +

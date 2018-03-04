@@ -2,11 +2,11 @@ package com.fastchat.FastChat.util;
 
 
 public class Command {
-	private String help;
-	private String name;
+	private final String help;
+	private final String name;
 
 	//it's Interface created for body
-	EnhancedCallable<String, String> body;
+	private final EnhancedCallable<String, String> body;
 
 
 	public EnhancedCallable getBody() {

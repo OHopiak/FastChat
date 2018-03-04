@@ -4,14 +4,14 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class ServerClient {
-	
-	public String name;
-	public InetAddress ip;
-	public int port;
+class ServerClient {
+
+	private static final ArrayList<Integer> identifiers = new ArrayList<>();
+	public final String name;
+	public final InetAddress ip;
 	private final int ID;
 	public int attempt = 0;
-	private static ArrayList<Integer> identifiers = new ArrayList<>();
+	public final int port;
 	
 	public int getID() {
 		return ID;
@@ -39,7 +39,7 @@ public class ServerClient {
 		for (Integer integer : identifiers) {
 			if (integer.equals(id)) {
 				identifiers.remove(integer);
-				return;
+				break;
 			}
 		}
 	}

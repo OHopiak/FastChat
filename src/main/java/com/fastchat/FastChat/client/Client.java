@@ -8,8 +8,8 @@ import java.net.*;
 
 public class Client {
 
-	private String name;
-	private int port;
+	private final String name;
+	private final int port;
 	private int ID;
 	private DatagramSocket socket;
 	private InetAddress ip;
@@ -22,7 +22,7 @@ public class Client {
 		this.port = port;
 	}
 
-	protected boolean openConnection(String address) {
+	boolean openConnection(String address) {
 		try {
 			socket = new DatagramSocket();
 			ip = InetAddress.getByName(address);
@@ -33,7 +33,7 @@ public class Client {
 		return true;
 	}
 
-	protected String receive() {
+	String receive() {
 		byte[] data = new byte[1024];
 		DatagramPacket packet = new DatagramPacket(data, data.length);
 		try {
@@ -51,12 +51,12 @@ public class Client {
 		send.start();
 	}
 
-	protected void send(String message) {
+	void send(String message) {
 		message += "/e/";
 		send(message.getBytes());
 	}
 
-	protected void disconnect(int id) {
+	void disconnect(int id) {
 		running = false;
 		//socket.close();
 		if (kicked || banned) {

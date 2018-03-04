@@ -1,30 +1,30 @@
-package Utils;
+package util;
+
 import com.fastchat.FastChat.util.Command;
 import org.testng.annotations.Test;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
 
 
 public class CommandTest {
 
-	Command command = new Command("help","", (argv) -> {
+	private final Command command = new Command("help", "", (argv) -> {
 		System.out.print("Do you really need help? ");
 		return null;
 	});
 
 	@Test
-	public void CommandNotNull(){
+	public void CommandNotNull() {
 		assertNotNull(command.getName());
 		assertNotNull(command.getHelp());
 		assertNotNull(command.getBody());
 	}
 
 	@Test
-	public void CommandEquals(){
+	public void CommandEquals() {
 		assertEquals("help", command.getName());
-		assertEquals("",command.getHelp());
+		assertEquals("", command.getHelp());
 
 	}
 }

@@ -11,14 +11,14 @@ import java.util.*;
 public class Server implements Runnable {
 
 	private final int MAX_ATTEMPTS = 4;
-	private List<ServerClient> clients = new ArrayList<>();
+	private final List<ServerClient> clients = new ArrayList<>();
 
-	private CommandRegistry commandRegistry = new CommandRegistry();
+	private final CommandRegistry commandRegistry = new CommandRegistry();
 
 	private DatagramSocket socket;
 
-	private int port;
-	private ArrayList<Integer> response = new ArrayList<>();
+	private final int port;
+	private final ArrayList<Integer> response = new ArrayList<>();
 	private boolean running;
 	private boolean raw;
 	@SuppressWarnings("FieldCanBeLocal")
@@ -74,12 +74,7 @@ public class Server implements Runnable {
 	}
 
 	/**
-	 * example: "kick 12345432 2345 3456 3456 34567 34567"
-	 * example - split: ["kick", "12345432", "2345", "3456", "3456", "34567", "34567"]
-	 * example - command name: "kick"
-	 * example - argv: ["12345432", "2345", "3456", "3456", "34567", "34567"]
-	 *
-	 * @param text
+	 * @param text command name with arguments
 	 */
 	private void command(String text) {
 		String[] args = text.split(" ");

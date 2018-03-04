@@ -22,8 +22,8 @@ artifact_jar="build/libs/`gradle printJarName -q 2>/dev/null`"
 artifact_docs="build/docs/javadoc"
 artifact_tests="build/reports/tests/test"
 
-mkdir -p $version_dir
-cp -r $artifact_jar $version_dir
-cp -r $artifact_docs $version_dir/docs
-cp -r $artifact_tests $version_dir/tests
+mkdir -p "$version_dir"
+cp -r "$artifact_jar" "$version_dir"
+cp -r "$artifact_docs" "$version_dir/docs"
+cp -r "$artifact_tests" "$version_dir/tests"
 

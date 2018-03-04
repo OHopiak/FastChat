@@ -41,7 +41,7 @@ public class Localization {
 		setLocale(new Locale(language));
 	}
 
-	public static void setLocale(Locale locale) {
+	private static void setLocale(Locale locale) {
 		switch (locale.getLanguage()) {
 			case "uk":
 				setBundle("ukrainian");

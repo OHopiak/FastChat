@@ -39,6 +39,7 @@
           <forms defaultalign-horz="false"/>
         </constraints>
         <properties>
+          <labelFor value="a2650"/>
           <text value="Name:"/>
         </properties>
       </component>
@@ -60,6 +61,7 @@
           <forms defaultalign-horz="false"/>
         </constraints>
         <properties>
+          <labelFor value="59788"/>
           <text value="Address:"/>
         </properties>
       </component>
@@ -80,6 +82,7 @@
           <forms defaultalign-horz="false"/>
         </constraints>
         <properties>
+          <labelFor value="67d70"/>
           <text value="Port:"/>
         </properties>
       </component>

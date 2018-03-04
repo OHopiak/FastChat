@@ -3,7 +3,7 @@ package com.fastchat.FastChat.util;
 import java.util.HashMap;
 
 public class CommandRegistry {
-	private HashMap<String, Command> commands = new HashMap<>();
+	private final HashMap<String, Command> commands = new HashMap<>();
 
 
 	public void add(Command command){

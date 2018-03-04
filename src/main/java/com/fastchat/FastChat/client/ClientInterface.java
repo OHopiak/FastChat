@@ -25,7 +25,7 @@ public abstract class ClientInterface implements Runnable {
 
 	protected abstract void onBreak();
 
-	protected void init() {
+	void init() {
 		client = new Client(name, port);
 		client.setRunning(true);
 
@@ -114,7 +114,7 @@ public abstract class ClientInterface implements Runnable {
 		return userArr;
 	}
 
-	public String getName() {
+	String getName() {
 		return name;
 	}
 
@@ -122,7 +122,7 @@ public abstract class ClientInterface implements Runnable {
 		this.name = name;
 	}
 
-	public String getAddress() {
+	String getAddress() {
 		return address;
 	}
 
@@ -130,7 +130,7 @@ public abstract class ClientInterface implements Runnable {
 		this.address = address;
 	}
 
-	public int getPort() {
+	int getPort() {
 		return port;
 	}
 

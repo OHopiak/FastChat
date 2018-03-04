@@ -9,8 +9,8 @@ import java.awt.*;
 public class OnlineUsers extends JFrame {
 
 	private static final long serialVersionUID = -3779778679932068169L;
-	private JPanel contentPane;
-	private JList<String> list;
+	private final JPanel contentPane;
+	private final JList<String> list;
 
 	OnlineUsers() {
 		setType(Type.UTILITY);
