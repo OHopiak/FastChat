@@ -26,6 +26,29 @@ class Loader {
 		System.out.println(helpString);
 	}
 
+	/**
+	 * Backend TODOs
+	 * TODO: Text Box for messages instead of Text Field
+	 * TODO: Limit width of message history Text Area
+	 * TODO: Show messages in separate boxes (or at least in different colors per user)
+	 * TODO: Group networking in a protocol
+	 * TODO: Add settings frame
+	 * TODO: Add sound to play when message comes
+	 * TODO: Make a single class (JavaBean) for User
+	 * TODO: Move networking from UDP to TCP
+	 * TODO: Make tests for existing classes
+	 * FIXME: Add cyrillic support in Windows
+	 * FIXME: Add either message limit, or enable sending messages of any length
+	 * <p>
+	 * Frontend TODOs:
+	 * TODO: Pick main color scheme
+	 * TODO: Make a dark and light theme
+	 * TODO: (optional) use Material UI
+	 * TODO: Reshape all components
+	 * TODO: Add custom font (must support any languages)
+	 *
+	 * @param args arguments of application
+	 */
 	public static void main(String[] args) {
 
 		Localization.autoSetLocale();                //English

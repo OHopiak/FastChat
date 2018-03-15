@@ -196,6 +196,7 @@ public class ClientGUI extends ClientInterface {
 		gbc.fill = GridBagConstraints.HORIZONTAL;
 		clientPanel.add(messagePrompt, gbc);
 		sendButton = new JButton();
+		sendButton.setText("Submit");
 		gbc = new GridBagConstraints();
 		gbc.gridx = 1;
 		gbc.gridy = 1;
