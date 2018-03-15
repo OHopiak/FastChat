@@ -27,6 +27,7 @@ class Loader {
 	}
 
 	/**
+	 * <pre>
 	 * Backend TODOs
 	 * TODO: Text Box for messages instead of Text Field
 	 * TODO: Limit width of message history Text Area
@@ -39,13 +40,14 @@ class Loader {
 	 * TODO: Make tests for existing classes
 	 * FIXME: Add cyrillic support in Windows
 	 * FIXME: Add either message limit, or enable sending messages of any length
-	 * <p>
+	 *
 	 * Frontend TODOs:
 	 * TODO: Pick main color scheme
 	 * TODO: Make a dark and light theme
 	 * TODO: (optional) use Material UI
 	 * TODO: Reshape all components
 	 * TODO: Add custom font (must support any languages)
+	 * </pre>
 	 *
 	 * @param args arguments of application
 	 */
