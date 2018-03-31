@@ -1,8 +1,10 @@
 package com.fastchat.FastChat.server;
 
+import com.fastchat.FastChat.networking.NetworkCommand;
+import com.fastchat.FastChat.networking.NetworkCommandRegistry;
+import com.fastchat.FastChat.networking.Networking;
 import com.fastchat.FastChat.util.Command;
 import com.fastchat.FastChat.util.CommandRegistry;
-import com.fastchat.FastChat.util.Networking;
 
 import java.io.IOException;
 import java.net.*;
@@ -11,9 +13,10 @@ import java.util.*;
 public class Server implements Runnable {
 
 	private final int MAX_ATTEMPTS = 4;
-	private final List<ServerClient> clients = new ArrayList<>();
+	private final List<ServerClient> clients = Collections.synchronizedList(new ArrayList<>());
 
 	private final CommandRegistry commandRegistry = new CommandRegistry();
+	private final NetworkCommandRegistry networkCommandRegistry = new NetworkCommandRegistry();
 
 	private DatagramSocket socket;
 
@@ -28,6 +31,10 @@ public class Server implements Runnable {
 		DISCONNECTED, TIMED_OUT, KICKED, BANNED
 	}
 
+	/**
+	 * @param port
+	 * @param address
+	 */
 	public Server(int port, String address) {
 		System.out.printf("Server started at %s:%d\n", address, port);
 		this.port = port;
@@ -43,6 +50,9 @@ public class Server implements Runnable {
 		run.start();
 	}
 
+	/**
+	 *
+	 */
 	public void run() {
 		running = true;
 		manageClients();
@@ -84,6 +94,9 @@ public class Server implements Runnable {
 
 	}
 
+	/**
+	 *
+	 */
 	private void manageClients() {
 		manage = new Thread("Manage") {
 			public void run() {
@@ -112,34 +125,22 @@ public class Server implements Runnable {
 		manage.start();
 	}
 
+	/**
+	 * @param packet
+	 */
 	private void process(DatagramPacket packet) {
 		String string = new String(packet.getData());
 		string = string.split("/e/")[0];
+
 		if (raw) System.out.println(string);
-		if (string.startsWith("/c/")) {
-			String name = string.substring(3);
-			ServerClient client = new ServerClient(name, packet.getAddress(), packet.getPort());
-			clients.add(client);
-			System.out.println(client + " has connected");
-			sendToAll(client.name + "(" + client.getID() + ") has connected");
-			send("/c/" + client.getID(), client.ip, client.port);
-		} else if (string.startsWith("/m/")) {
+
+		NetworkCommand cmd = networkCommandRegistry.get(string.charAt(1) + "");
+
+		//FIXME hardcoded crappy if statement should be replaced
+		if (cmd == null || string.length() < 3 || string.charAt(0) != '/' || string.charAt(2) != '/')
 			System.out.println(string);
-			sendToAll(string);
-		} else if (string.startsWith("/d/")) {
-			int id = Integer.parseInt(string.substring(3));
-			disconnectClient(id, Status.DISCONNECTED);
-		} else if (string.startsWith("/i/")) {
-			response.add(Integer.parseInt(string.substring(3)));
-		} else if (string.startsWith("/u/")) {
-			StringBuilder message = new StringBuilder("/u/");
-			for (ServerClient client : clients) {
-				message.append(client.name).append("(").append(client.getID()).append(")//");
-			}
-			send(message.toString(), packet.getAddress(), packet.getPort());
-		} else {
-			System.out.println(string);
-		}
+		else
+			cmd.exec(string, packet.getAddress().getHostAddress(), Integer.toString(packet.getPort()));
 	}
 
 	private void receive() {
@@ -210,72 +211,128 @@ public class Server implements Runnable {
 
 	private void initCommands() {
 
-		this.commandRegistry.add(new Command("exit", (argv) -> {
-			System.out.print("Do you really want to exit? (y/n)   ");
-			Scanner input = new Scanner(System.in);
-			char option = input.nextLine().toLowerCase().charAt(0);
-			if (option == 'y') {
-				System.exit(0);
-			}
-			return null;
-		}));
+		commandRegistry.add(
+				new Command("exit", (argv) -> {
+					System.out.print("Do you really want to exit? (y/n)   ");
+					Scanner input = new Scanner(System.in);
+					char option = input.nextLine().toLowerCase().charAt(0);
+					if (option == 'y') {
+						System.exit(0);
+					}
+					return null;
+				}),
+				new Command("help", (argv) -> {
+					System.out.println("Available commands: ");
+					commandRegistry.getRegistry().forEach((name, c) ->
+							System.out.println("/" + name + (c.getHelp().isEmpty() ? "" : " - " + c.getHelp()))
+					);
+					return null;
+				}),
+				new Command("clients", "prints the list of clients", (argv) -> {
+					System.out.println("Clients:");
+					System.out.println("===================================");
+					for (ServerClient serverClient : clients) {
+						System.out.println(serverClient);
+					}
+					System.out.println("===================================");
+					return null;
+				}),
+				new Command("kick", "kick the list of clients", (argv) -> {
+					for (String name : argv) {
 
-		this.commandRegistry.add(new Command("help", (argv) -> {
-			System.out.println("Available commands: ");
-			commandRegistry.getCommands().forEach((name, c) ->
-					System.out.println("/" + name + (c.getHelp().isEmpty() ? "" : " - " + c.getHelp()))
-			);
-			return null;
-		}));
-
-		this.commandRegistry.add(new Command("clients", "prints the list of clients", (argv) -> {
-			System.out.println("Clients:");
-			System.out.println("===================================");
-			for (ServerClient serverClient : clients) {
-				System.out.println(serverClient);
-			}
-			System.out.println("===================================");
-			return null;
-		}));
-
-		this.commandRegistry.add(new Command("kick", "kick the list of clients", (argv) -> {
-			for (String name : argv) {
-
-				int id = -1;
-				boolean number = true;
-				try {
-					id = Integer.parseInt(name);
-				} catch (NumberFormatException e) {
-					number = false;
-				}
-				if (number) {
-					boolean exists = false;
-					for (ServerClient client : clients) {
-						if (client.getID() == id) {
-							exists = true;
-							break;
+						int id = -1;
+						boolean number = true;
+						try {
+							id = Integer.parseInt(name);
+						} catch (NumberFormatException e) {
+							number = false;
+						}
+						if (number) {
+							boolean exists = false;
+							for (ServerClient client : clients) {
+								if (client.getID() == id) {
+									exists = true;
+									break;
+								}
+							}
+							if (exists)
+								disconnectClient(id, Status.KICKED);
+							else
+								System.out.println("Client with id " + id + " does not exist");
+						} else {
+							for (ServerClient client : clients) {
+								if (name.equals(client.name)) {
+									disconnectClient(client.getID(), Status.KICKED);
+									break;
+								}
+							}
 						}
 					}
-					if (exists)
-						disconnectClient(id, Status.KICKED);
-					else
-						System.out.println("Client with id " + id + " does not exist");
-				} else {
-					for (ServerClient client : clients) {
-						if (name.equals(client.name)) {
-							disconnectClient(client.getID(), Status.KICKED);
-							break;
-						}
-					}
-				}
-			}
-			return null;
-		}));
+					return null;
+				}),
+				new Command("raw", "", (argv) -> {
+					raw = !raw;
+					System.out.println((raw ? "Raw mode enabled" : "Raw mode disabled"));
+					return null;
+				})
+		);
 
-		this.commandRegistry.add(new Command("raw", "", (argv) -> {
-			raw = !raw;
-			System.out.println((raw ? "Raw mode enabled" : "Raw mode disabled"));
-			return null;
-		}));
+		networkCommandRegistry.add(
+				new NetworkCommand("ping", "i", (args) -> {
+					if (args.length <= 0) return;
+					String data = args[0];
+					response.add(Integer.parseInt(data.substring(3)));
+				}),
+				new NetworkCommand("connect", "c", (args) -> {
+					if (args.length < 3) return;
+					String data = args[0];
+					InetAddress address;
+					try {
+						address = InetAddress.getByAddress(args[1].getBytes());
+					} catch (UnknownHostException e) {
+						System.err.println("Couldn't send connection confirm to " + args[1]);
+						return;
+					}
+					int port = Integer.parseInt(args[2]);
+					String name = data.substring(3);
+					ServerClient client = new ServerClient(name, address, port);
+					synchronized (clients) {
+						clients.add(client);
+					}
+					System.out.println(client + " has connected");
+					sendToAll(client.name + "(" + client.getID() + ") has connected");
+					send("/c/" + client.getID(), client.ip, client.port);
+				}),
+				new NetworkCommand("message", "m", (args) -> {
+					if (args.length <= 0) return;
+					String data = args[0];
+					System.out.println(data);
+					sendToAll(data);
+				}),
+				new NetworkCommand("disconnect", "d", (args) -> {
+					if (args.length <= 0) return;
+					String data = args[0];
+					int id = Integer.parseInt(data.substring(3));
+					synchronized (clients) {
+						disconnectClient(id, Status.DISCONNECTED);
+					}
+				}),
+				new NetworkCommand("users", "u", (args) -> {
+					if (args.length < 3) return;
+					InetAddress address;
+					try {
+						address = InetAddress.getByAddress(args[1].getBytes());
+					} catch (UnknownHostException e) {
+						System.err.println("Couldn't send user list to " + args[1]);
+						return;
+					}
+					int port = Integer.parseInt(args[2]);
+					StringBuilder message = new StringBuilder("/u/");
+					for (ServerClient client : clients) {
+						message.append(client.name).append("(").append(client.getID()).append(")//");
+					}
+					send(message.toString(), address, port);
+				})
+		);
 	}
 }

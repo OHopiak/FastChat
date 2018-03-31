@@ -1,6 +1,6 @@
 package com.fastchat.FastChat.client;
 
-import com.fastchat.FastChat.util.Networking;
+import com.fastchat.FastChat.networking.Networking;
 
 import javax.swing.*;
 import java.io.IOException;
