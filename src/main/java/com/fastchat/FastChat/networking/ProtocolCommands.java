@@ -48,8 +48,8 @@ public class ProtocolCommands {
 	}
 
 	public static class Users extends NetworkCommand {
-		static String NAME = "disconnect";
-		static String SHORTCUT = "d";
+		static String NAME = "users";
+		static String SHORTCUT = "u";
 		public static final String PREFIX = prefix(SHORTCUT);
 
 		public Users(EnhancedRunnable<String> receive) {

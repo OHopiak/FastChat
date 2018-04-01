@@ -100,7 +100,6 @@ public class ClientGUI extends ClientInterface {
 	@Override
 	protected void send(String message) {
 		if (message.equals("")) return;
-		message = client.getName() + ": " + message;
 		messagePrompt.setText("");
 		client.send(ProtocolCommands.Message.PREFIX + message);
 	}
@@ -109,6 +108,7 @@ public class ClientGUI extends ClientInterface {
 	protected void onBreak() {
 		history.setBackground(new Color(55, 55, 55));
 		messagePrompt.setEditable(false);
+		System.exit(1); //FIXME
 	}
 
 	/**
