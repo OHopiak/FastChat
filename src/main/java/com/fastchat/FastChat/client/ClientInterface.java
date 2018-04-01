@@ -1,5 +1,8 @@
 package com.fastchat.FastChat.client;
 
+import com.fastchat.FastChat.networking.NetworkCommandRegistry;
+import com.fastchat.FastChat.networking.Protocol;
+import com.fastchat.FastChat.networking.ProtocolCommands;
 import com.fastchat.FastChat.util.Localization;
 
 public abstract class ClientInterface implements Runnable {
@@ -7,9 +10,11 @@ public abstract class ClientInterface implements Runnable {
 	Client client;
 	private OnlineUsers users;
 	private String[] userArr = {"Name(id)"};
-	private Thread run, listen;
+	private final NetworkCommandRegistry networkCommandRegistry = new NetworkCommandRegistry();
 	private String name, address;
 	private int port;
+	@SuppressWarnings("FieldCanBeLocal")
+	private Thread run, listen;
 
 	ClientInterface() {
 		this("Anon", "localhost", 1234);
@@ -20,6 +25,7 @@ public abstract class ClientInterface implements Runnable {
 		this.address = address;
 		this.port = port;
 
+		initCommands();
 //		init();
 	}
 
@@ -41,7 +47,7 @@ public abstract class ClientInterface implements Runnable {
 		} else {
 			this.serve();
 		}
-		client.send(("/c/" + name));
+		client.send((ProtocolCommands.Connect.PREFIX + name));
 		users = new OnlineUsers();
 	}
 
@@ -54,38 +60,14 @@ public abstract class ClientInterface implements Runnable {
 	}
 
 	private void listen() {
-		listen = new Thread("Listen") {
-			public void run() {
-				while (client.isRunning()) {
-					String message = client.receive();
+		listen = Protocol.listen(client::isRunning, () -> {
+			String message = Protocol.parsePacket(Protocol.receive(client.getSocket()));
 //					System.out.println(message);
-					if (message.startsWith("/c/")) {
-						client.setID(Integer.parseInt(message.substring(3)));
-						console("Connection is setted up successfully... ID is " + client.getID());
-					} else if (message.startsWith("/m/")) {
-						console(message.substring(3));
-					} else if (message.startsWith("/i/")) {
-						client.send("/i/" + client.getID());
-					} else if (message.startsWith("/d/")) {
-						message = message.substring(3);
-						if (message.startsWith("0")) {
-							client.setKicked(true);
-							client.disconnect(client.getID());
-						} else {
-							client.setBanned(true);
-							client.disconnect(client.getID());
-						}
-					} else if (message.startsWith("/u/")) {
-						message = message.substring(3);
-						userArr = message.split("//");
-						users.updateList(userArr);
-						users.setVisible(true);
-					} else {
-						console("Server: " + message);
-					}
-				}
-			}
-		};
+			Protocol.process(message, networkCommandRegistry,
+					Protocol.IGNORE,
+					() -> console("Server: " + message)
+			);
+		});
 		listen.start();
 	}
 
@@ -94,24 +76,45 @@ public abstract class ClientInterface implements Runnable {
 		run.start();
 	}
 
+	private void initCommands() {
+		networkCommandRegistry.add(
+				new ProtocolCommands.Ping((args) -> client.send(ProtocolCommands.Ping.PREFIX + client.getID())),
+				new ProtocolCommands.Connect((args) -> {
+					if (args.length < 3) return;
+					String data = args[0];
+					client.setID(Integer.parseInt(data.substring(3)));
+					console("Connection is set up successfully... ID is " + client.getID());
+				}),
+				new ProtocolCommands.Message((args) -> {
+					if (args.length <= 0) return;
+					String data = args[0];
+					console(data.substring(3));
+				}),
+				new ProtocolCommands.Disconnect((args) -> {
+					if (args.length <= 0) return;
+					String data = args[0];
+					data = data.substring(3);
+					if (data.startsWith("0")) {
+						client.setKicked(true);
+						client.disconnect(client.getID());
+					} else {
+						client.setBanned(true);
+						client.disconnect(client.getID());
+					}
+				}),
+				new ProtocolCommands.Users((args) -> {
+					if (args.length <= 0) return;
+					String data = args[0];
+					data = data.substring(3);
+					userArr = data.split("//");
+					users.updateList(userArr);
+					users.setVisible(true);
+				})
+		);
+	}
+
 	public Client getClient() {
 		return client;
-	}
-
-	public Thread getRun() {
-		return run;
-	}
-
-	public Thread getListen() {
-		return listen;
-	}
-
-	public OnlineUsers getUsers() {
-		return users;
-	}
-
-	public String[] getUserArr() {
-		return userArr;
 	}
 
 	String getName() {
@@ -124,10 +127,6 @@ public abstract class ClientInterface implements Runnable {
 
 	String getAddress() {
 		return address;
-	}
-
-	public void setAddress(String address) {
-		this.address = address;
 	}
 
 	int getPort() {

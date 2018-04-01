@@ -3,100 +3,39 @@
   <ID>JAVA</ID>
   <OriginalElement />
   <nodes>
-    <node x="589.4075757575757" y="1634.0">com.fastchat.FastChat.Loader</node>
-    <node x="310.0" y="990.0">com.fastchat.FastChat.client.ClientGUI</node>
-    <node x="651.0" y="1086.0">com.fastchat.FastChat.client.LoginInterface</node>
-    <node x="491.4204545454545" y="1372.0">com.fastchat.FastChat.client.LoginGUI</node>
-    <node x="379.5704545454545" y="0.0">com.fastchat.FastChat.client.Client</node>
-    <node x="202.0" y="1110.0">com.fastchat.FastChat.server.Server.Status</node>
-    <node x="18.73333333333329" y="1312.0">com.fastchat.FastChat.server.Server</node>
-    <node x="666.5704545454545" y="180.0">com.fastchat.FastChat.client.OnlineUsers</node>
-    <node x="0.0" y="1062.0">com.fastchat.FastChat.server.ServerClient</node>
-    <node x="544.8204545454545" y="476.0">com.fastchat.FastChat.client.ClientInterface</node>
+    <node x="112.5" y="82.0">com.fastchat.FastChat.Loader</node>
+    <node x="144.0" y="0.0">com.fastchat.FastChat.client</node>
+    <node x="283.0" y="0.0">com.fastchat.FastChat.util</node>
+    <node x="0.0" y="207.0">com.fastchat.FastChat.networking</node>
+    <node x="0.0" y="0.0">com.fastchat.FastChat.server</node>
+    <node x="201.0" y="207.0">com.fastchat.FastChat.beans</node>
   </nodes>
   <notes />
   <edges>
-    <edge source="com.fastchat.FastChat.client.LoginGUI" target="com.fastchat.FastChat.client.LoginInterface">
-      <point x="0.0" y="-76.0" />
-      <point x="651.9204545454545" y="1287.0" />
-      <point x="697.0" y="1287.0" />
-      <point x="-92.0" y="40.0" />
+    <edge source="com.fastchat.FastChat.Loader" target="com.fastchat.FastChat.server">
+      <point x="-68.25" y="-40.0" />
+      <point x="135.25" y="57.0" />
+      <point x="62.0" y="57.0" />
+      <point x="0.0" y="16.0" />
     </edge>
-    <edge source="com.fastchat.FastChat.client.ClientGUI" target="com.fastchat.FastChat.client.ClientInterface">
-      <point x="80.25" y="-136.0" />
-      <point x="550.75" y="970.0" />
-      <point x="623.5704545454545" y="970.0" />
-      <point x="-26.25" y="232.0" />
+    <edge source="com.fastchat.FastChat.Loader" target="com.fastchat.FastChat.util">
+      <point x="68.25" y="-40.0" />
+      <point x="271.75" y="57.0" />
+      <point x="336.0" y="57.0" />
+      <point x="0.0" y="16.0" />
     </edge>
-    <edge source="com.fastchat.FastChat.client.LoginGUI" target="com.fastchat.FastChat.client.ClientGUI">
-      <point x="-107.0" y="-76.0" />
-      <point x="544.9204545454545" y="1287.0" />
-      <point x="470.5" y="1287.0" />
-      <point x="0.0" y="136.0" />
-    </edge>
-    <edge source="com.fastchat.FastChat.server.Server" target="com.fastchat.FastChat.server.ServerClient">
-      <point x="0.0" y="-136.0" />
-      <point x="155.2333333333333" y="1287.0" />
-      <point x="151.66666666666663" y="1287.0" />
-      <point x="60.66666666666663" y="64.0" />
-    </edge>
-    <edge source="com.fastchat.FastChat.client.ClientInterface" target="com.fastchat.FastChat.client.OnlineUsers">
-      <point x="42.0" y="-232.0" />
-      <point x="691.8204545454545" y="456.0" />
-      <point x="720.5704545454545" y="456.0" />
-      <point x="-54.0" y="28.0" />
-    </edge>
-    <edge source="com.fastchat.FastChat.server.Server.Status" target="com.fastchat.FastChat.server.Server">
-      <point x="22.0" y="16.0" />
-      <point x="268.0" y="1287.0" />
-      <point x="264.43333333333334" y="1287.0" />
-      <point x="109.20000000000005" y="-136.0" />
-    </edge>
-    <edge source="com.fastchat.FastChat.Loader" target="com.fastchat.FastChat.client.LoginInterface">
-      <point x="60.66666666666663" y="-52.0" />
-      <point x="741.0742424242424" y="1609.0" />
-      <point x="822.9204545454545" y="1609.0" />
-      <point x="822.9204545454545" y="1287.0" />
-      <point x="881.0" y="1287.0" />
-      <point x="91.99999999999994" y="40.0" />
-    </edge>
-    <edge source="com.fastchat.FastChat.client.ClientInterface" target="com.fastchat.FastChat.client.Client">
-      <point x="-84.0" y="-232.0" />
-      <point x="565.8204545454545" y="456.0" />
-      <point x="424.0704545454545" y="456.0" />
-      <point x="-89.0" y="208.0" />
-    </edge>
-    <edge source="com.fastchat.FastChat.Loader" target="com.fastchat.FastChat.server.Server">
-      <point x="-60.66666666666663" y="-52.0" />
-      <point x="619.7409090909091" y="1609.0" />
-      <point x="155.2333333333333" y="1609.0" />
-      <point x="0.0" y="136.0" />
-    </edge>
-    <edge source="com.fastchat.FastChat.client.LoginInterface" target="com.fastchat.FastChat.client.ClientInterface">
-      <point x="68.99999999999994" y="-40.0" />
-      <point x="858.0" y="970.0" />
-      <point x="728.5704545454545" y="970.0" />
-      <point x="78.75" y="232.0" />
-    </edge>
-    <edge source="com.fastchat.FastChat.server.Server" target="com.fastchat.FastChat.server.Server.Status">
-      <point x="54.60000000000002" y="-136.0" />
-      <point x="209.83333333333331" y="1287.0" />
-      <point x="224.0" y="1287.0" />
-      <point x="-22.0" y="16.0" />
-    </edge>
-    <edge source="com.fastchat.FastChat.Loader" target="com.fastchat.FastChat.client.LoginGUI">
-      <point x="0.0" y="-52.0" />
-      <point x="680.4075757575757" y="1609.0" />
-      <point x="651.9204545454545" y="1609.0" />
-      <point x="0.0" y="76.0" />
+    <edge source="com.fastchat.FastChat.Loader" target="com.fastchat.FastChat.client">
+      <point x="-22.75" y="-40.0" />
+      <point x="180.75" y="57.0" />
+      <point x="173.75" y="57.0" />
+      <point x="-29.75" y="16.0" />
     </edge>
   </edges>
-  <settings layout="Hierarchic Group" zoom="1.0" x="257.0" y="185.0" />
+  <settings layout="Hierarchic Group" zoom="0.9494773519163763" x="245.0" y="277.0" />
   <SelectedNodes>
-    <node>com.fastchat.FastChat.Loader</node>
+    <node>com.fastchat.FastChat.server</node>
   </SelectedNodes>
   <Categories>
-    <Category>Inner Classes</Category>
     <Category>Methods</Category>
   </Categories>
   <SCOPE>All</SCOPE>

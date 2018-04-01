@@ -15,3 +15,7 @@ gradlew
 gradlew.bat
 build
 .gradletasknamecache
+
+#TestNG
+test-output
+

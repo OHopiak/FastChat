@@ -14,9 +14,7 @@ public class Command {
 	}
 
 
-
 	/**
-	 *
 	 * @param name a name of the command
 	 * @param body body of the command
 	 */
@@ -31,7 +29,6 @@ public class Command {
 	}
 
 	/**
-	 *
 	 * @param args command arguments
 	 */
 	public void exec(String... args) {
