@@ -1,5 +1,6 @@
 package com.fastchat.FastChat.client;
 
+import com.fastchat.FastChat.networking.ProtocolCommands;
 import com.fastchat.FastChat.util.Localization;
 
 import javax.swing.*;
@@ -78,7 +79,7 @@ public class ClientGUI extends ClientInterface {
 		JMenu menu = new JMenu(Localization.get("menu_bar_menu"));
 		menuBar.add(menu);
 		JMenuItem onlineUsers = new JMenuItem(Localization.get("menu_bar_online_users"));
-		onlineUsers.addActionListener(event -> client.send("/u/"));
+		onlineUsers.addActionListener(event -> client.send(ProtocolCommands.Users.PREFIX));
 		menu.add(onlineUsers);
 
 		JMenuItem settings = new JMenuItem(Localization.get("menu_bar_settings"));
@@ -101,7 +102,7 @@ public class ClientGUI extends ClientInterface {
 		if (message.equals("")) return;
 		message = client.getName() + ": " + message;
 		messagePrompt.setText("");
-		client.send("/m/" + message);
+		client.send(ProtocolCommands.Message.PREFIX + message);
 	}
 
 	@Override

@@ -1,12 +1,11 @@
 package com.fastchat.FastChat.server;
 
-import com.fastchat.FastChat.networking.NetworkCommand;
 import com.fastchat.FastChat.networking.NetworkCommandRegistry;
-import com.fastchat.FastChat.networking.Networking;
+import com.fastchat.FastChat.networking.Protocol;
+import com.fastchat.FastChat.networking.ProtocolCommands;
 import com.fastchat.FastChat.util.Command;
 import com.fastchat.FastChat.util.CommandRegistry;
 
-import java.io.IOException;
 import java.net.*;
 import java.util.*;
 
@@ -25,7 +24,7 @@ public class Server implements Runnable {
 	private boolean running;
 	private boolean raw;
 	@SuppressWarnings("FieldCanBeLocal")
-	private Thread run, manage, send, receive;
+	private Thread run, manage, receive;
 
 	private enum Status {
 		DISCONNECTED, TIMED_OUT, KICKED, BANNED
@@ -72,8 +71,8 @@ public class Server implements Runnable {
 			}
 
 			if (!text.startsWith("/")) {
-				sendToAll("/m/Server: " + text + "/e/");
-				System.out.println("/m/Server: " + text + "/e/");
+				sendToAll(ProtocolCommands.Message.PREFIX + "Server: " + text + Protocol.EOD);
+				System.out.println(ProtocolCommands.Message.PREFIX + "Server: " + text + Protocol.EOD);
 				continue;
 			}
 
@@ -91,7 +90,6 @@ public class Server implements Runnable {
 		String commandName = args[0];
 		args = Arrays.copyOfRange(args, 1, args.length);
 		this.commandRegistry.run(commandName, args);
-
 	}
 
 	/**
@@ -101,22 +99,24 @@ public class Server implements Runnable {
 		manage = new Thread("Manage") {
 			public void run() {
 				while (running) {
-					sendToAll("/i/");
-					try {
-						Thread.sleep(5000);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					for (ServerClient c : clients) {
-						if (!response.contains(c.getID())) {
-							if (c.attempt >= MAX_ATTEMPTS) {
-								disconnectClient(c.getID(), Status.TIMED_OUT);
+					synchronized (clients) {
+						sendToAll(ProtocolCommands.Ping.PREFIX);
+						try {
+							Thread.sleep(5000);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+						for (ServerClient c : clients) {
+							if (!response.contains(c.getID())) {
+								if (c.attempt >= MAX_ATTEMPTS) {
+									disconnectClient(c.getID(), Status.TIMED_OUT);
+								} else {
+									++c.attempt;
+								}
 							} else {
-								++c.attempt;
+								response.remove(new Integer(c.getID()));
+								c.attempt = 0;
 							}
-						} else {
-							response.remove(new Integer(c.getID()));
-							c.attempt = 0;
 						}
 					}
 				}
@@ -125,50 +125,25 @@ public class Server implements Runnable {
 		manage.start();
 	}
 
-	/**
-	 * @param packet
-	 */
-	private void process(DatagramPacket packet) {
-		String string = new String(packet.getData());
-		string = string.split("/e/")[0];
-
-		if (raw) System.out.println(string);
-
-		NetworkCommand cmd = networkCommandRegistry.get(string.charAt(1) + "");
-
-		//FIXME hardcoded crappy if statement should be replaced
-		if (cmd == null || string.length() < 3 || string.charAt(0) != '/' || string.charAt(2) != '/')
-			System.out.println(string);
-		else
-			cmd.exec(string, packet.getAddress().getHostAddress(), Integer.toString(packet.getPort()));
-	}
-
 	private void receive() {
-		receive = new Thread("Receive") {
-			public void run() {
-				while (running) {
-					byte[] data = new byte[1024];
-					DatagramPacket packet = new DatagramPacket(data, data.length);
-					try {
-						socket.receive(packet);
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-					process(packet);
-				}
-			}
-		};
+		receive = Protocol.listen(() -> running, this::tick);
 		receive.start();
 	}
 
-	private void send(final byte[] data, final InetAddress address, final int port) {
-		send = Networking.send(socket, data, address, port);
-		send.start();
+	private void tick() {
+		DatagramPacket packet = Protocol.receive(socket);
+		String string = Protocol.parsePacket(packet);
+
+		Protocol.process(packet, networkCommandRegistry,
+				() -> {
+					if (raw) System.out.println(string);
+				},
+				() -> System.out.println("[Err]: " + string)
+		);
 	}
 
-	private void send(String message, InetAddress ip, int port) {
-		message += "/e/";
-		send(message.getBytes(), ip, port);
+	private void send(String message, InetAddress address, int port) {
+		Protocol.send(socket, message, address, port).start();
 	}
 
 	private void sendToAll(String string) {
@@ -189,7 +164,7 @@ public class Server implements Runnable {
 						disc += "was timed out.";
 						break;
 					case KICKED:
-						send("/d/0", client.ip, client.port);
+						send(ProtocolCommands.Disconnect.PREFIX + "0", client.ip, client.port);
 						disc += "was kicked out of server.";
 						break;
 					case BANNED:
@@ -278,17 +253,17 @@ public class Server implements Runnable {
 		);
 
 		networkCommandRegistry.add(
-				new NetworkCommand("ping", "i", (args) -> {
+				new ProtocolCommands.Ping((args) -> {
 					if (args.length <= 0) return;
 					String data = args[0];
 					response.add(Integer.parseInt(data.substring(3)));
 				}),
-				new NetworkCommand("connect", "c", (args) -> {
+				new ProtocolCommands.Connect((args) -> {
 					if (args.length < 3) return;
 					String data = args[0];
 					InetAddress address;
 					try {
-						address = InetAddress.getByAddress(args[1].getBytes());
+						address = InetAddress.getByName(args[1]);
 					} catch (UnknownHostException e) {
 						System.err.println("Couldn't send connection confirm to " + args[1]);
 						return;
@@ -301,15 +276,15 @@ public class Server implements Runnable {
 					}
 					System.out.println(client + " has connected");
 					sendToAll(client.name + "(" + client.getID() + ") has connected");
-					send("/c/" + client.getID(), client.ip, client.port);
+					send(ProtocolCommands.Connect.PREFIX + client.getID(), client.ip, client.port);
 				}),
-				new NetworkCommand("message", "m", (args) -> {
+				new ProtocolCommands.Message((args) -> {
 					if (args.length <= 0) return;
 					String data = args[0];
 					System.out.println(data);
 					sendToAll(data);
 				}),
-				new NetworkCommand("disconnect", "d", (args) -> {
+				new ProtocolCommands.Disconnect((args) -> {
 					if (args.length <= 0) return;
 					String data = args[0];
 					int id = Integer.parseInt(data.substring(3));
@@ -317,7 +292,7 @@ public class Server implements Runnable {
 						disconnectClient(id, Status.DISCONNECTED);
 					}
 				}),
-				new NetworkCommand("users", "u", (args) -> {
+				new ProtocolCommands.Users((args) -> {
 					if (args.length < 3) return;
 					InetAddress address;
 					try {
@@ -327,7 +302,7 @@ public class Server implements Runnable {
 						return;
 					}
 					int port = Integer.parseInt(args[2]);
-					StringBuilder message = new StringBuilder("/u/");
+					StringBuilder message = new StringBuilder(ProtocolCommands.Users.PREFIX);
 					for (ServerClient client : clients) {
 						message.append(client.name).append("(").append(client.getID()).append(")//");
 					}

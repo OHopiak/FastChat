@@ -1,10 +1,13 @@
 package com.fastchat.FastChat.client;
 
-import com.fastchat.FastChat.networking.Networking;
+import com.fastchat.FastChat.networking.Protocol;
+import com.fastchat.FastChat.networking.ProtocolCommands;
 
 import javax.swing.*;
-import java.io.IOException;
-import java.net.*;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 
 public class Client {
 
@@ -13,7 +16,6 @@ public class Client {
 	private int ID;
 	private DatagramSocket socket;
 	private InetAddress ip;
-	private Thread send;
 	private boolean running = false, kicked = false, banned = false;
 
 	Client(String name, int port) {
@@ -33,27 +35,8 @@ public class Client {
 		return true;
 	}
 
-	String receive() {
-		byte[] data = new byte[1024];
-		DatagramPacket packet = new DatagramPacket(data, data.length);
-		try {
-			socket.receive(packet);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		String message = new String(packet.getData());
-		message = message.split("/e/")[0];
-		return message;
-	}
-
-	private void send(final byte[] data) {
-		send = Networking.send(socket, data, ip, port);
-		send.start();
-	}
-
 	void send(String message) {
-		message += "/e/";
-		send(message.getBytes());
+		Protocol.send(socket, message, ip, port).start();
 	}
 
 	void disconnect(int id) {
@@ -69,7 +52,7 @@ public class Client {
 			kicked = false;
 			banned = false;
 		} else {
-			send("/d/" + id);
+			send(ProtocolCommands.Disconnect.PREFIX + id);
 			System.exit(0);
 		}
 	}
@@ -116,5 +99,9 @@ public class Client {
 
 	public void setBanned(boolean banned) {
 		this.banned = banned;
+	}
+
+	public DatagramSocket getSocket() {
+		return socket;
 	}
 }
