@@ -1,0 +1,16 @@
+# Custom
+
+# Maven
+target/
+
+# IntelliJ
+.idea/
+out
+*.iml
+
+# Gradle
+.gradle
+gradle
+gradlew
+gradlew.bat
+build
