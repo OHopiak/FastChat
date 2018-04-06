@@ -91,7 +91,7 @@ public class Server implements Runnable {
 					}
 					synchronized (clients) {
 						clients.forEach((id, c) -> {
-							if (c.socket.isClosed())
+							if (c.getSocket().isClosed())
 								disconnectClient(c.getID(), Status.TIMED_OUT);
 						});
 					}
@@ -155,8 +155,8 @@ public class Server implements Runnable {
 	}
 
 	private void send(String message, ServerClient client) {
-		client.out.println(message);
-		client.out.flush();
+		client.getOut().println(message);
+		client.getOut().flush();
 	}
 
 	private void console(Object message) {
@@ -172,7 +172,7 @@ public class Server implements Runnable {
 		if (client == null) {
 			return;
 		}
-		String disc = client.name + "(" + client.getID() + ") ";
+		String disc = client.getName() + "(" + client.getID() + ") ";
 		switch (status) {
 			case DISCONNECTED:
 				disc += "disconnected.";
@@ -189,7 +189,7 @@ public class Server implements Runnable {
 				break;
 		}
 		try {
-			client.socket.close();
+			client.getSocket().close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -300,7 +300,7 @@ public class Server implements Runnable {
 					if (current == null) return;
 					StringBuilder message = new StringBuilder(ProtocolCommands.Users.PREFIX);
 					clients.forEach((key, client) ->
-							message.append(client.name)
+							message.append(client.getName())
 									.append("(")
 									.append(client.getID())
 									.append(")//"));
@@ -319,19 +319,19 @@ public class Server implements Runnable {
 	private Thread getClientThread(ServerClient client) {
 		return new Thread(() -> {
 			try {
-				client.name = client.reader.readLine();
+				client.setName(client.getReader().readLine());
 			} catch (IOException e) {
 				e.printStackTrace();
 				return;
 			}
 
 			console(client + " has connected");
-			sendToAll(client.name + "(" + client.getID() + ") has connected");
+			sendToAll(client.getName() + "(" + client.getID() + ") has connected");
 			send(ProtocolCommands.Connect.PREFIX + client.getID(), client);
 
-			while (!client.socket.isClosed()) {
+			while (!client.getSocket().isClosed()) {
 				try {
-					String line = client.reader.readLine();
+					String line = client.getReader().readLine();
 					if (line == null) return;
 					Protocol.process(client, line, networkCommandRegistry,
 							() -> {

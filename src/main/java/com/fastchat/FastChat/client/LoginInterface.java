@@ -1,7 +1,7 @@
 package com.fastchat.FastChat.client;
 
 public abstract class LoginInterface {
-	ClientInterface clientInterface;
+	protected ClientInterface clientInterface;
 
 	protected abstract void submit(String name, String address, int port);
 

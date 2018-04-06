@@ -39,6 +39,7 @@ repositories {
 
 dependencies {
 	libraries 'com.jgoodies:jgoodies-forms:1.6.0'
+	libraries 'com.google.code.gson:gson:2.8.2'
 //	libraries 'com.intellij:forms_rt:7.0.3'
 	testCompile 'org.testng:testng:6.9.12'
 	testCompile 'com.google.guava:guava:19.0'

@@ -9,8 +9,8 @@ import java.io.IOException;
 
 public abstract class ClientInterface implements Runnable {
 
-	Client client;
-	private OnlineUsers users;
+	protected Client client;
+	protected OnlineUsersInterface users;
 	private String[] userArr = {"Name(id)"};
 	private final NetworkCommandRegistry networkCommandRegistry = new NetworkCommandRegistry();
 	private String name, address;
@@ -18,11 +18,11 @@ public abstract class ClientInterface implements Runnable {
 	@SuppressWarnings("FieldCanBeLocal")
 	private Thread run, listen;
 
-	ClientInterface() {
+	protected ClientInterface() {
 		this("Anon", "localhost", 1234);
 	}
 
-	ClientInterface(String name, String address, int port) {
+	protected ClientInterface(String name, String address, int port) {
 		this.name = name;
 		this.address = address;
 		this.port = port;
@@ -33,7 +33,7 @@ public abstract class ClientInterface implements Runnable {
 
 	protected abstract void onBreak();
 
-	void init() {
+	public void init() {
 		client = new Client(name, port);
 		client.setRunning(true);
 
@@ -56,12 +56,11 @@ public abstract class ClientInterface implements Runnable {
 			this.serve();
 		}
 //		client.send((ProtocolCommands.Connect.PREFIX + name));
-		users = new OnlineUsers();
 	}
 
 	protected abstract void send(String message);
 
-	abstract void console(String message);
+	protected abstract void console(String message);
 
 	public void run() {
 		listen();
@@ -103,12 +102,11 @@ public abstract class ClientInterface implements Runnable {
 				new ProtocolCommands.Message((args) -> {
 					if (args.length <= 0) return;
 					String data = args[0];
-					console(data.substring(3));
+					console(data);
 				}),
 				new ProtocolCommands.Disconnect((args) -> {
 					if (args.length <= 0) return;
 					String data = args[0];
-					data = data.substring(3);
 					if (data.startsWith("0")) {
 						client.setKicked(true);
 						client.disconnect(client.getID());
@@ -120,10 +118,9 @@ public abstract class ClientInterface implements Runnable {
 				new ProtocolCommands.Users((args) -> {
 					if (args.length <= 0) return;
 					String data = args[0];
-					data = data.substring(3);
 					userArr = data.split("//");
-					users.updateList(userArr);
-					users.setVisible(true);
+					users.update(userArr);
+					users.show();
 				})
 		);
 	}
@@ -132,7 +129,7 @@ public abstract class ClientInterface implements Runnable {
 		return client;
 	}
 
-	String getName() {
+	protected String getName() {
 		return name;
 	}
 
@@ -140,11 +137,11 @@ public abstract class ClientInterface implements Runnable {
 		this.name = name;
 	}
 
-	String getAddress() {
+	protected String getAddress() {
 		return address;
 	}
 
-	int getPort() {
+	protected int getPort() {
 		return port;
 	}
 
