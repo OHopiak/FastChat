@@ -1,30 +1,33 @@
 package com.fastchat.FastChat.server;
 
+import com.fastchat.FastChat.beans.User;
+
+import java.io.IOException;
 import java.net.InetAddress;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class ServerClient {
-	
-	public String name;
-	public InetAddress ip;
-	public int port;
-	private final int ID;
-	public int attempt = 0;
-	private static ArrayList<Integer> identifiers = new ArrayList<Integer>();
-	
-	public int getID() {
-		return ID;
+public class ServerClient extends User {
+
+	private static final ArrayList<Integer> identifiers = new ArrayList<>();
+
+	private ServerClient(String name, InetAddress ip, int port, Socket socket) throws IOException {
+		setName(name);
+		setPort(port);
+		setIp(ip);
+		setSocket(socket);
+		setID(createId());
 	}
-	
-	public ServerClient(String name, InetAddress ip, int port) {
-		super();
-		this.name = name;
-		this.ip = ip;
-		this.port = port;
-		this.ID = createId();
+
+	ServerClient(Socket socket) throws IOException {
+		this(socket.getInetAddress().getHostAddress() + ":" + socket.getPort(), socket);
 	}
-	
+
+	private ServerClient(String name, Socket socket) throws IOException {
+		this(name, socket.getInetAddress(), socket.getPort(), socket);
+	}
+
 	private static int createId() {
 		int id = new Random().nextInt(10000);
 		if (!(identifiers.contains(id) || id <= 0)) {
@@ -34,18 +37,19 @@ public class ServerClient {
 			return createId();
 		}
 	}
-	
+
 	public static void removeId(int id) {
 		for (Integer integer : identifiers) {
 			if (integer.equals(id)) {
 				identifiers.remove(integer);
-				return;
+				break;
 			}
 		}
 	}
-	
+
 	@Override
 	public String toString() {
-		return (name != null ? name : "NONAME") + "(" + ID + ")" + (ip != null ? ip + ":" : "NOADDRESS") + port;
+		return (getName() != null ? getName() : "NONAME") + "(" + getID() + ")";
+//				+ (ip != null ? ip + ":" : "NOADDRESS") + port;
 	}
 }

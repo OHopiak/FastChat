@@ -1,4 +1,21 @@
 language: java
 
+cache: gradle
+
 jdk:
   - oraclejdk8
+
+env:
+  global:
+    - GH_REPO_NAME: FastChat
+    - GH_REPO_REF: github.com/OHopiak/FastChat.git
+
+script:
+  - gradle assemble
+  - gradle check jacocoTestReport
+  - gradle build javadoc
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
+  - cd $TRAVIS_BUILD_DIR
+  - ./scripts/deploy-travis

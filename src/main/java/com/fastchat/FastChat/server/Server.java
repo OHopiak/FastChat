@@ -1,165 +1,99 @@
 package com.fastchat.FastChat.server;
 
+import com.fastchat.FastChat.networking.NetworkCommandRegistry;
+import com.fastchat.FastChat.networking.Protocol;
+import com.fastchat.FastChat.networking.ProtocolCommands;
+import com.fastchat.FastChat.util.Command;
+import com.fastchat.FastChat.util.CommandRegistry;
+
 import java.io.IOException;
-import java.net.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
 
 public class Server implements Runnable {
 
-	private final int MAX_ATTEMPTS = 4;
-	private static final String[] commands = {"clients", /*"cls",*/ "help", "kick", "raw", "exit"};
-	private List<ServerClient> clients = new ArrayList<>();
+	private static final String CARET = "> ";
 
-	private DatagramSocket socket;
+	private final CommandRegistry commandRegistry = new CommandRegistry();
+	private final NetworkCommandRegistry networkCommandRegistry = new NetworkCommandRegistry();
+	private final HashMap<Integer, ServerClient> clients = new HashMap<>();
 
-	private int port;
-	private ArrayList<Integer> response = new ArrayList<>();
+	private final int port;
 	private boolean running;
 	private boolean raw;
+	private ServerSocket serverSocket;
 	@SuppressWarnings("FieldCanBeLocal")
-	private Thread run, manage, send, receive;
+	private Thread run, manage, receive, console;
 
+	private enum Status {
+		DISCONNECTED, TIMED_OUT, KICKED, BANNED
+	}
+
+	/**
+	 * @param port
+	 * @param address
+	 */
 	public Server(int port, String address) {
 		System.out.printf("Server started at %s:%d\n", address, port);
 		this.port = port;
 		try {
-			socket = new DatagramSocket(this.port, InetAddress.getByName(address));
-		} catch (SocketException | UnknownHostException e) {
+			serverSocket = new ServerSocket(port, 100, InetAddress.getByName(address));
+		} catch (IOException e) {
 			e.printStackTrace();
 			return;
 		}
 		run = new Thread(this, "Server");
+		initCommands();
 		run.start();
 	}
 
+	/**
+	 *
+	 */
 	public void run() {
 		running = true;
 		manageClients();
 		receive();
-		Scanner in = new Scanner(System.in);
-		System.out.println("Type /help to get some information");
-		while (running) {
-			System.out.print("> ");
-			String text;
-
-			try {
-				text = in.nextLine();
-			} catch (NoSuchElementException e) {
-				// Ctrl-D used
-				System.exit(0);
-				continue;
-			}
-
-			if (!text.startsWith("/")) {
-				sendToAll("/m/Server: " + text + "/e/");
-				System.out.println("/m/Server: " + text + "/e/");
-				continue;
-			}
-
-			text = text.substring(1);
-			command(text);
-		}
-		if (!running) in.close();
+		startConsole();
+		console("Type /help to get more information");
 	}
 
+	/**
+	 * @param text command name with arguments
+	 */
 	private void command(String text) {
-		switch (text.split(" ")[0]) {
-			case "raw":
-				raw = !raw;
-				System.out.println((raw ? "Raw mode enabled" : "Raw mode disabled"));
-				break;
-//			case "cls":
-//				System.out.flush();
-//				Process p;
-//				try {
-//					p = Runtime.getRuntime().exec("cls");
-//					p.waitFor();
-//				} catch (IOException | InterruptedException e) {
-//					System.err.println("Cannot run this command");
-//				}
-//				break;
-			case "clients":
-				System.out.println("Clients:");
-				System.out.println("===================================");
-				for (ServerClient serverClient : clients) {
-					System.out.println(serverClient);
-				}
-				System.out.println("===================================");
-				break;
-			case "kick":
-				String name = text.split(" ")[1];
-				int id = -1;
-				boolean number = true;
-				try {
-					id = Integer.parseInt(name);
-				} catch (NumberFormatException e) {
-					number = false;
-				}
-				if (number) {
-					boolean exists = false;
-					for (ServerClient client : clients) {
-						if (client.getID() == id) {
-							exists = true;
-							break;
-						}
-					}
-					if (exists)
-						disconnectClient(id, Status.KICKED);
-					else
-						System.out.println("Client with id " + id + " does not exist");
-				} else {
-					for (ServerClient client : clients) {
-						if (name.equals(client.name)) {
-							disconnectClient(client.getID(), Status.KICKED);
-							break;
-						}
-					}
-				}
-				break;
-			case "help":
-				System.out.println("Available commands: ");
-				for (String command : commands) {
-					System.out.println("/" + command);
-				}
-				break;
-			case "exit":
-				System.out.print("Do you really want to exit? (y/n)   ");
-				Scanner input = new Scanner(System.in);
-				char option = input.nextLine().toLowerCase().charAt(0);
-				if (option == 'y') {
-					System.exit(0);
-				}
-				break;
-			default:
-				System.out.println("Command does not exist!");
+		String[] args = text.split(" ");
+		String commandName = args[0];
+		args = Arrays.copyOfRange(args, 1, args.length);
+		try {
+			commandRegistry.run(commandName, args);
+		} catch (IllegalArgumentException e) {
+			System.out.println("Command \"" + commandName + "\" doesn't exist");
 		}
-
 	}
 
+	/**
+	 *
+	 */
 	private void manageClients() {
 		manage = new Thread("Manage") {
 			public void run() {
 				while (running) {
-					sendToAll("/i/");
 					try {
 						Thread.sleep(5000);
 					} catch (InterruptedException e) {
 						e.printStackTrace();
 					}
-					for (ServerClient c : clients) {
-						if (!response.contains(c.getID())) {
-							if (c.attempt >= MAX_ATTEMPTS) {
+					synchronized (clients) {
+						clients.forEach((id, c) -> {
+							if (c.getSocket().isClosed())
 								disconnectClient(c.getID(), Status.TIMED_OUT);
-							} else {
-								++c.attempt;
-							}
-						} else {
-							response.remove(new Integer(c.getID()));
-							c.attempt = 0;
-						}
+						});
 					}
 				}
 			}
@@ -167,112 +101,249 @@ public class Server implements Runnable {
 		manage.start();
 	}
 
-	private void process(DatagramPacket packet) {
-		String string = new String(packet.getData());
-		string = string.split("/e/")[0];
-		if (raw) System.out.println(string);
-		if (string.startsWith("/c/")) {
-			String name = string.substring(3);
-			ServerClient client = new ServerClient(name, packet.getAddress(), packet.getPort());
-			clients.add(client);
-			System.out.println(client + " has connected");
-			sendToAll(client.name + "(" + client.getID() + ") has connected");
-			send("/c/" + client.getID(), client.ip, client.port);
-		} else if (string.startsWith("/m/")) {
-			System.out.println(string);
-			sendToAll(string);
-		} else if (string.startsWith("/d/")) {
-			int id = Integer.parseInt(string.substring(3));
-			disconnectClient(id, Status.DISCONNECTED);
-		} else if (string.startsWith("/i/")) {
-			response.add(Integer.parseInt(string.substring(3)));
-		} else if (string.startsWith("/u/")) {
-			StringBuilder message = new StringBuilder("/u/");
-			for (ServerClient client : clients) {
-				message.append(client.name).append("(").append(client.getID()).append(")//");
-			}
-			send(message.toString(), packet.getAddress(), packet.getPort());
-		} else {
-			System.out.println(string);
-		}
-	}
-
 	private void receive() {
-		receive = new Thread("Receive") {
-			public void run() {
-				while (running) {
-					byte[] data = new byte[1024];
-					DatagramPacket packet = new DatagramPacket(data, data.length);
-					try {
-						socket.receive(packet);
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-					process(packet);
-				}
-			}
-		};
+		receive = Protocol.listen(() -> running, this::tick);
 		receive.start();
 	}
 
-	private void send(final byte[] data, final InetAddress address, final int port) {
-		send = new Thread("Send") {
-			public void run() {
-				DatagramPacket packet = new DatagramPacket(data, data.length, address, port);
-				try {
-					socket.send(packet);
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		};
-		send.start();
+	private void tick() {
+		try {
+			Socket socket = serverSocket.accept();
+			ServerClient client = new ServerClient(socket);
+			clients.put(client.getID(), client);
+			getClientThread(client).start();
+		} catch (IOException e) {
+			System.err.println("I/O error: " + e);
+		}
+//		DatagramPacket packet = Protocol.receive(clientSocket);
+//		String string = Protocol.parsePacket(packet);
+//
+//		Protocol.process(packet, networkCommandRegistry,
+//				() -> {
+//					if (raw) System.out.println(string);
+//				},
+//				() -> System.out.println("[Err]: " + string)
+//		);
 	}
 
-	private void send(String message, InetAddress ip, int port) {
-		message += "/e/";
-		send(message.getBytes(), ip, port);
+	private void startConsole() {
+		console = new Thread(() -> {
+			Scanner in = new Scanner(System.in);
+			while (running) {
+				String text;
+
+				try {
+					text = in.nextLine();
+				} catch (NoSuchElementException e) {
+					// Ctrl-D used
+					System.exit(0);
+					continue;
+				}
+
+				if (!text.startsWith("/")) {
+					sendToAll("Server: " + text);
+					console("Server: " + text);
+					continue;
+				}
+
+				text = text.substring(1);
+				command(text);
+			}
+			if (!running) in.close();
+		}, "Console");
+		console.start();
+	}
+
+	private void send(String message, ServerClient client) {
+		client.getOut().println(message);
+		client.getOut().flush();
+	}
+
+	private void console(Object message) {
+		System.out.print("\r" + message.toString() + "\n" + CARET);
 	}
 
 	private void sendToAll(String string) {
-		for (ServerClient client : clients) {
-			send(string, client.ip, client.port);
-		}
+		clients.forEach((id, client) -> send(ProtocolCommands.Message.PREFIX + string, client));
 	}
 
 	private void disconnectClient(int id, Status status) {
-		for (ServerClient client : clients) {
-			if (client.getID() == id) {
-				String disc = client.name + "(" + client.getID() + ") ";
-				switch (status) {
-					case DISCONNECTED:
-						disc += "disconnected.";
-						break;
-					case TIMED_OUT:
-						disc += "was timed out.";
-						break;
-					case KICKED:
-						send("/d/0", client.ip, client.port);
-						disc += "was kicked out of server.";
-						break;
-					case BANNED:
-						disc += "was banned!";
-						break;
-				}
-				clients.remove(client);
-				ServerClient.removeId(id);
-				System.out.println(disc);
-				sendToAll(disc);
-				break;
-			}
+		ServerClient client = clients.getOrDefault(id, null);
+		if (client == null) {
+			return;
 		}
+		String disc = client.getName() + "(" + client.getID() + ") ";
+		switch (status) {
+			case DISCONNECTED:
+				disc += "disconnected.";
+				break;
+			case TIMED_OUT:
+				disc += "was timed out.";
+				break;
+			case KICKED:
+				send(ProtocolCommands.Disconnect.PREFIX + "0", client);
+				disc += "was kicked out of server.";
+				break;
+			case BANNED:
+				disc += "was banned!";
+				break;
+		}
+		try {
+			client.getSocket().close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		synchronized (clients) {
+			clients.remove(id);
+		}
+		ServerClient.removeId(id);
+		console(disc);
+		sendToAll(disc);
+
 	}
 
 	public int getPort() {
 		return port;
 	}
 
-	private enum Status {
-		DISCONNECTED, TIMED_OUT, KICKED, BANNED
+	private void initCommands() {
+
+		commandRegistry.add(
+				new Command("exit", (argv) -> {
+					System.out.print("Do you really want to exit? (y/n)   ");
+					Scanner input = new Scanner(System.in);
+					char option = input.nextLine().toLowerCase().charAt(0);
+					if (option == 'y') {
+						System.exit(0);
+					}
+					return null;
+				}),
+				new Command("help", (argv) -> {
+					console("Available commands: ");
+					commandRegistry.getRegistry().forEach((name, c) ->
+							console("/" + name + (c.getHelp().isEmpty() ? "" : " - " + c.getHelp()))
+					);
+					return null;
+				}),
+				new Command("clients", "prints the list of clients", (argv) -> {
+					console("Clients:");
+					console("===================================");
+					clients.forEach((id, client) -> console(client));
+					console("===================================");
+					return null;
+				}),
+				new Command("kick", "kick the list of clients", (argv) -> {
+					for (String name : argv) {
+
+						int id = -1;
+						try {
+							id = Integer.parseInt(name);
+						} catch (NumberFormatException ignored) {
+						}
+						if (clients.containsKey(id))
+							disconnectClient(id, Status.KICKED);
+						else
+							console("Client with id " + id + " does not exist");
+					}
+					return null;
+				}),
+				new Command("raw", "", (argv) -> {
+					raw = !raw;
+					console((raw ? "Raw mode enabled" : "Raw mode disabled"));
+					return null;
+				})
+		);
+
+		networkCommandRegistry.add(
+//				new ProtocolCommands.Connect((args) -> {
+//					if (args.length < 3) return;
+//					String data = args[0];
+//					InetAddress address;
+//					try {
+//						address = InetAddress.getByName(args[1]);
+//					} catch (UnknownHostException e) {
+//						System.err.println("Couldn't send connection confirm to " + args[1]);
+//						return;
+//					}
+//					int port = Integer.parseInt(args[2]);
+//					String name = data.substring(3);
+//					ServerClient client = null;
+//					try {
+//						client = new ServerClient(name, address, port, null);
+//					} catch (IOException e) {
+//						e.printStackTrace();
+//						return;
+//					}
+//					synchronized (clients) {
+//						clients.add(client);
+//					}
+//				}),
+				new ProtocolCommands.Message((args) -> {
+					if (args.length <= 0) return;
+					String data = args[0];
+					int id = Integer.parseInt(args[1]);
+					if (clients.containsKey(id)) {
+						data = clients.get(id) + ":" + data;
+						console(data);
+						sendToAll(data);
+					}
+				}),
+				new ProtocolCommands.Disconnect((args) -> {
+					if (args.length < 2) return;
+					int id = Integer.parseInt(args[1]);
+					disconnectClient(id, Status.DISCONNECTED);
+				}),
+				new ProtocolCommands.Users((args) -> {
+					if (args.length < 2) return;
+					int id = Integer.parseInt(args[1]);
+					ServerClient current = clients.getOrDefault(id, null);
+					if (current == null) return;
+					StringBuilder message = new StringBuilder(ProtocolCommands.Users.PREFIX);
+					clients.forEach((key, client) ->
+							message.append(client.getName())
+									.append("(")
+									.append(client.getID())
+									.append(")//"));
+					send(message.toString(), current);
+				})
+		);
+
+	}
+
+	/**
+	 * Creates a thread for connection with client
+	 *
+	 * @param client that has connected
+	 * @return thread that keeps the connection with client
+	 */
+	private Thread getClientThread(ServerClient client) {
+		return new Thread(() -> {
+			try {
+				client.setName(client.getReader().readLine());
+			} catch (IOException e) {
+				e.printStackTrace();
+				return;
+			}
+
+			console(client + " has connected");
+			sendToAll(client.getName() + "(" + client.getID() + ") has connected");
+			send(ProtocolCommands.Connect.PREFIX + client.getID(), client);
+
+			while (!client.getSocket().isClosed()) {
+				try {
+					String line = client.getReader().readLine();
+					if (line == null) return;
+					Protocol.process(client, line, networkCommandRegistry,
+							() -> {
+								if (raw) console(line);
+							},
+							() -> console("[Err]: " + line)
+					);
+				} catch (IOException e) {
+					e.printStackTrace();
+					return;
+				}
+			}
+		});
 	}
 }
