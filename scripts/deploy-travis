@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+
+PROJECT_DIR=$(cd $(dirname "$0")/.. && echo "$PWD")
+BUILD_DIR="$PROJECT_DIR/build"
+GH_PAGES_DIR="$BUILD_DIR/gh-pages"
+BRANCH=$(git branch | grep \* | cut -d ' ' -f2-)
+
+if [ "$BRANCH" == "master" ]; then
+	DEPLOY_DIR="$GH_PAGES_DIR"
+else
+	DEPLOY_DIR="$GH_PAGES_DIR/$BRANCH"
+fi
+
+set -ex
+
+function copy_markdown(){
+	cp "$PROJECT_DIR"/*.md "$DEPLOY_DIR"
+}
+
+function deploy_dir(){
+	local dir=$1
+	if [ -d "$BUILD_DIR/$dir" ]; then
+		if [ -d "$DEPLOY_DIR/$dir" ]; then
+			rm -fr "$DEPLOY_DIR/$dir"
+		fi
+		cp -r "$BUILD_DIR/$dir" "$DEPLOY_DIR/$dir"
+	else
+		echo "Directory $dir doesn't exist"
+	fi
+}
+
+function set_up_git(){
+	# delete directory with pages if it exists
+	if [ -d "$GH_PAGES_DIR" ]; then
+		rm -fr "$GH_PAGES_DIR"
+	fi
+
+	git clone -b gh-pages "https://git@$GH_REPO_REF.git" "$GH_PAGES_DIR"
+
+	cd "$GH_PAGES_DIR"
+	git config --global push.default simple
+	git config user.name "Travis CI"
+	git config user.email "travis@travis-ci.org"
+}
+
+function push_changes(){
+	if ! git diff-index --quiet HEAD --; then
+		git add --all
+		git commit -m "Deploy code docs to GitHub Pages Travis build: ${TRAVIS_BUILD_NUMBER}" -m "Commit: ${TRAVIS_COMMIT}"
+		git push --force "https://${GH_REPO_TOKEN}@${GH_REPO_REF}" > /dev/null 2>&1
+	fi
+}
+
+function main(){
+	if [ ! -d "$PROJECT_DIR/build" ]; then
+		echo "You must build the project before deploying"
+		exit 1
+	fi
+
+	set_up_git
+	mkdir -p "$DEPLOY_DIR"
+	copy_markdown
+	deploy_dir libs
+	deploy_dir docs
+	deploy_dir reports
+	push_changes
+	echo "Deploy is finished successfully"
+}
+
+main

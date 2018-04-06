@@ -2,7 +2,7 @@ apply plugin: 'java'
 apply plugin: 'jacoco'
 
 group = 'com.fastchat'
-version = '0.0.2'
+version = '0.0.3'
 
 description = """FastChat - a tool for instant chatting that not always works as expected - WIP"""
 
@@ -39,6 +39,7 @@ repositories {
 
 dependencies {
 	libraries 'com.jgoodies:jgoodies-forms:1.6.0'
+	libraries 'com.google.code.gson:gson:2.8.2'
 //	libraries 'com.intellij:forms_rt:7.0.3'
 	testCompile 'org.testng:testng:6.9.12'
 	testCompile 'com.google.guava:guava:19.0'

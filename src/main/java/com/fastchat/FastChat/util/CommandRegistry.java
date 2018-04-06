@@ -10,7 +10,7 @@ public class CommandRegistry {
 			registry.put(command.getName(), command);
 	}
 
-	public void run(String name, String... args) {
+	public void run(String name, String... args) throws IllegalArgumentException {
 		Command c = registry.get(name);
 
 		if (c != null) {

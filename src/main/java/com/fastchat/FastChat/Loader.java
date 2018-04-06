@@ -1,7 +1,7 @@
 package com.fastchat.FastChat;
 
-import com.fastchat.FastChat.client.LoginGUI;
 import com.fastchat.FastChat.client.LoginInterface;
+import com.fastchat.FastChat.client.gui.LoginGUI;
 import com.fastchat.FastChat.server.Server;
 import com.fastchat.FastChat.util.Localization;
 
